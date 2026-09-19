@@ -794,7 +794,13 @@ function generateQuiz(topicIndex){
   quiz = {items:items, index:0, correct:0, topicIndex:topicIndex};
 }
 function startTests(){
-  if (quiz && quiz.index < quiz.items.length){ goto('quiz'); renderQuizQuestion(); return; }
+  // Если квиз уже идёт — просто возвращаемся к нему,
+  // не перерисовывая и не сбрасывая текущий вопрос.
+  if (quiz && quiz.index < quiz.items.length){
+    goto('quiz');
+    return;
+  }
+
   generateQuiz(FOCUS_TOPIC_INDEX);
   goto('quiz');
   renderQuizQuestion();
