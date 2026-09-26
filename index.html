@@ -230,7 +230,7 @@
     <!-- DASHBOARD -->
     <main class="view active" id="view-dashboard">
       <h1>Oral Exam Trainer</h1>
-      <p class="subtitle">Winter session oral exam on History of Kazakhstan — conducted in English. Current focus: the Stone Age.</p>
+      <p class="subtitle">Practice the complete 15-week History of Kazakhstan syllabus in English.</p>
 
       <div class="stats-row">
         <div class="stat-card"><div class="stat-value" id="stat-best">—</div><div class="stat-label">Best score</div></div>
@@ -238,13 +238,13 @@
       </div>
 
       <div class="btn-row" style="margin-top:0;">
-        <button class="btn btn-primary" id="start-test-btn">Start Practice Round — Stone Age</button>
+        <button class="btn btn-primary" id="start-test-btn">Start Practice — Week 1</button>
         <button class="btn btn-secondary" data-view="flashcards">Flashcard Review</button>
         <button class="btn btn-secondary" data-view="essay">Written Practice</button>
       </div>
-      <button id="start-mixed-btn" style="background:none;border:none;color:var(--primary-500);font-size:13px;cursor:pointer;padding:0;margin-top:10px;text-decoration:underline;">Or run a mixed round across all 14 periods</button>
+      <button id="start-mixed-btn" style="background:none;border:none;color:var(--primary-500);font-size:13px;cursor:pointer;padding:0;margin-top:10px;text-decoration:underline;">Or run a balanced Mixed round across the whole syllabus</button>
 
-      <h2 style="margin-top:28px;">Review by Period</h2>
+      <h2 style="margin-top:28px;">Quiz by Syllabus Week</h2>
       <div class="topics-grid" id="topics-grid"></div>
     </main>
 
@@ -282,7 +282,7 @@
     <main class="view" id="view-flashcards">
       <div id="flashcards-intro">
         <h1>Flashcard Review</h1>
-        <p class="subtitle">Free recall — no options shown. Answer out loud before revealing the correct answer. This is the closest practice to what the oral exam actually asks of you. Current focus: the Stone Age.</p>
+        <p class="subtitle">Free recall across the complete syllabus — answer out loud before revealing the correct answer.</p>
 
         <div class="stats-row">
           <div class="stat-card"><div class="stat-value" id="stat-recall">—</div><div class="stat-label">Recall rate</div></div>
@@ -290,11 +290,11 @@
         </div>
 
         <div class="btn-row" style="margin-top:0;">
-          <button class="btn btn-primary" id="start-flashcards-btn">Start Flashcard Review — Stone Age</button>
+          <button class="btn btn-primary" id="start-flashcards-btn">Start Flashcards — Week 1</button>
         </div>
-        <button id="start-mixed-flashcards-btn" style="background:none;border:none;color:var(--primary-500);font-size:13px;cursor:pointer;padding:0;margin-top:10px;text-decoration:underline;">Or run a mixed review across all 14 periods</button>
+        <button id="start-mixed-flashcards-btn" style="background:none;border:none;color:var(--primary-500);font-size:13px;cursor:pointer;padding:0;margin-top:10px;text-decoration:underline;">Or run a balanced Mixed review across the whole syllabus</button>
 
-        <h2 style="margin-top:28px;">Review by Period</h2>
+        <h2 style="margin-top:28px;">Flashcards by Syllabus Week</h2>
         <div class="topics-grid" id="flashcards-topics-grid"></div>
       </div>
 
@@ -711,6 +711,125 @@ appendUniqueQuestions(1, EARLY_IRON_AGE_EXAM_QUESTIONS);
 appendUniqueQuestions(3, TURKIC_ERA_EXAM_QUESTIONS);
 appendUniqueQuestions(4, KARAKHANID_EXAM_QUESTIONS);
 
+// Rebuild the legacy period-based bank into the exact 15-week syllabus structure.
+// Week 8 reviews Weeks 1–7 and is excluded from the all-course Mixed mode so
+// the first half of the syllabus is not counted twice.
+const LEGACY_QUESTION_BANK = QUESTION_BANK.map(function(list){ return list.slice(); });
+
+function questionMatches(item, pattern){ return pattern.test(item.q); }
+function uniqueQuestions(lists){
+  const result = [];
+  const seen = new Set();
+  lists.forEach(function(list){
+    list.forEach(function(item){
+      const key = item.q.trim().toLowerCase();
+      if (!seen.has(key)){ seen.add(key); result.push(item); }
+    });
+  });
+  return result;
+}
+
+const PREHISTORIC_PATTERN = /paleolithic|mesolithic|neolithic|eneolithic|chalcolithic|stone age|fire-making|ancient human|karatau|arkaim|bronze age|andronov|begazy|dandybai/i;
+function isWeek1AncientQuestion(item, index){ return index < 7 || questionMatches(item, PREHISTORIC_PATTERN); }
+const week1FromAncient = LEGACY_QUESTION_BANK[1].filter(isWeek1AncientQuestion);
+const week2EarlyIron = LEGACY_QUESTION_BANK[1].filter(function(item, index){ return !isWeek1AncientQuestion(item, index); });
+
+const INDUSTRIALIZATION_PATTERN = /industrial|turksib|railway|extractive|confiscation|collectivi|little october|households|agriculture was dominated|ainabulak|mass repression|1937-1938/i;
+const week9Political = LEGACY_QUESTION_BANK[10].filter(function(item){ return !questionMatches(item, INDUSTRIALIZATION_PATTERN); });
+const week10Economic = LEGACY_QUESTION_BANK[10].filter(function(item){ return questionMatches(item, INDUSTRIALIZATION_PATTERN); });
+
+const POSTWAR_TO_1965_PATTERN = /in 1949|in 1957|in 1965|uzen/i;
+const week11Postwar = LEGACY_QUESTION_BANK[12].filter(function(item){ return questionMatches(item, POSTWAR_TO_1965_PATTERN); });
+const week12LateSoviet = LEGACY_QUESTION_BANK[12].filter(function(item){ return !questionMatches(item, POSTWAR_TO_1965_PATTERN); });
+
+const GEO_POLITICAL_PATTERN = /member of the UN|capital|renamed Astana|Kazakhstan-2030|EXPO-2017|Eurasian Economic Union|Kazakhstan-2050|Semipalatinsk Nuclear Test Site/i;
+const week14GeoPolitics = LEGACY_QUESTION_BANK[13].filter(function(item){ return questionMatches(item, GEO_POLITICAL_PATTERN); });
+const week13Formation = LEGACY_QUESTION_BANK[13].filter(function(item){
+  return !questionMatches(item, GEO_POLITICAL_PATTERN) && !/in 2019/i.test(item.q);
+});
+
+const NEW_KAZAKHSTAN_QUESTIONS = [
+  {q:"Who became President of Kazakhstan after Nursultan Nazarbayev resigned in 2019?",options:["Kassym-Jomart Tokayev","Dariga Nazarbayeva","Yerlan Koshanov","Askar Mamin"],correct:0},
+  {q:"On what date was the State-of-the-Nation Address titled “New Kazakhstan: Path of Renewal and Modernization” delivered?",options:["16 March 2022","5 June 2022","17 September 2022","1 January 2023"],correct:0},
+  {q:"When was Kazakhstan's nationwide referendum on constitutional amendments held?",options:["5 June 2022","16 December 2021","20 November 2022","19 March 2023"],correct:0},
+  {q:"How many articles of the Constitution were changed by the 2022 referendum package?",options:["33 articles","7 articles","15 articles","70 articles"],correct:0},
+  {q:"What presidential term was introduced by Kazakhstan's 2022 constitutional reform?",options:["One seven-year term without re-election","Two five-year terms","One ten-year term","Unlimited four-year terms"],correct:0},
+  {q:"When did the re-established Constitutional Court of Kazakhstan begin operating?",options:["1 January 2023","5 June 2022","19 March 2023","25 October 2022"],correct:0},
+  {q:"How are Mazhilis seats divided under the mixed electoral model used in 2023?",options:["70% party lists and 30% single-member districts","50% party lists and 50% single-member districts","30% party lists and 70% appointed seats","All seats by party lists"],correct:0},
+  {q:"When was the capital's name changed from Nur-Sultan back to Astana?",options:["17 September 2022","6 July 2021","5 June 2022","1 January 2023"],correct:0},
+  {q:"Which date is celebrated as Republic Day after its restoration as a national holiday in 2022?",options:["25 October","16 December","30 August","1 December"],correct:0},
+  {q:"Where was the inaugural meeting of the National Kurultai held in 2022?",options:["Ulytau","Turkistan","Atyrau","Almaty"],correct:0}
+];
+
+const WEEK_9_EXTRA_QUESTIONS = [
+  {q:"During which years did the Civil War and political confrontation covered by Week 9 take place?",options:["1918–1920","1905–1907","1928–1933","1941–1945"],correct:0},
+  {q:"In what year was the Kyrgyz (Kazakh) ASSR renamed the Kazakh ASSR?",options:["1925","1920","1936","1929"],correct:0},
+  {q:"Which severe humanitarian crisis struck Kazakhstan in the early 1920s?",options:["The famine of 1921–1922","The famine of 1931–1933","The Aral crisis","The Virgin Lands crisis"],correct:0},
+  {q:"What was a major cultural policy of the 1920s in Kazakhstan?",options:["Literacy campaigns and expansion of Soviet schools","Closure of all schools","A ban on publishing","Abolition of scientific institutions"],correct:0},
+  {q:"What did national-territorial delimitation in 1924–1925 help define?",options:["The territorial framework of Soviet republics in Central Asia","The borders of the Golden Horde","The Silk Road trade routes","The Dzungar military frontier"],correct:0}
+];
+
+const WEEK_10_EXTRA_QUESTIONS = [
+  {q:"Which famine was a major consequence of forced collectivization in Kazakhstan?",options:["The famine of 1931–1933","The famine of 1921–1922","The famine of 1946–1947","The famine of 1891–1892"],correct:0},
+  {q:"What traditional economic system was severely damaged by collectivization and sedentarization?",options:["Nomadic and semi-nomadic pastoralism","Maritime trade","Plantation agriculture","Urban banking"],correct:0},
+  {q:"What was the name of the collective-farm system created during collectivization?",options:["Kolkhozes and sovkhozes","Iqta and waqf","Ulus and zhuz","Guilds and communes"],correct:0}
+];
+
+const WEEK_12_EXTRA_QUESTIONS = [
+  {q:"Which term is commonly used for the Brezhnev-era socio-economic slowdown?",options:["Stagnation","War Communism","The Thaw","The Great Leap"],correct:0},
+  {q:"Which Soviet reform policy was associated with Mikhail Gorbachev after 1985?",options:["Perestroika","Collectivization","War Communism","The Virgin Lands campaign"],correct:0},
+  {q:"What did glasnost encourage in the late Soviet period?",options:["Greater openness and public discussion","Total closure of the press","A return to khan rule","The abolition of education"],correct:0},
+  {q:"On what date did the Kazakh SSR adopt its Declaration of State Sovereignty?",options:["25 October 1990","16 December 1991","30 August 1995","1 December 1991"],correct:0},
+  {q:"Which environmental problem became especially severe during the late Soviet period?",options:["The shrinking of the Aral Sea","A rise in Baltic sea levels","Deforestation of the Amazon","Pollution of the Mediterranean"],correct:0},
+  {q:"Which movement grew during perestroika alongside political liberalization?",options:["National and sovereignty movements","The Crusader movement","The Decembrist army","The Rouran confederation"],correct:0}
+];
+
+const WEEK_14_EXTRA_QUESTIONS = [
+  {q:"What is the core idea of Kazakhstan's multi-vector foreign policy?",options:["Balanced relations with several major powers and regions","Alliance with only one state","Complete international isolation","Withdrawal from international organizations"],correct:0}
+];
+
+const syllabusTopics = [
+  {name:"Week 1 · Introduction to the History of Kazakhstan. Prehistoric Kazakhstan (the Stone Age and Bronze Age)",era:"Prehistory and course foundations"},
+  {name:"Week 2 · The Early Iron Age in Kazakhstan (1st Millennium BC)",era:"Saka, Huns, Wusun, Kangju and Sarmatians"},
+  {name:"Week 3 · Kazakhstan in the Turkic Era (VI–XII Centuries)",era:"Turkic states and the Great Silk Road"},
+  {name:"Week 4 · The Great Steppe in the Period of the Golden Horde (XIII–XV Centuries)",era:"Mongol uluses and successor states"},
+  {name:"Week 5 · The Kazakh Khanate in the Second Half of the 15th – Early 18th Centuries",era:"Formation, consolidation and Dzungar wars"},
+  {name:"Week 6 · Kazakhstan in the XVIII – Early XX Centuries",era:"Russian imperial period"},
+  {name:"Week 7 · Kazakhstan at the Beginning of the 20th Century",era:"1905–1918"},
+  {name:"Week 8 · Midterm Control Assignment",era:"Review of Weeks 1–7",reviewWeeks:[0,1,2,3,4,5,6]},
+  {name:"Week 9 · Civil War and Political Confrontation (1918–1920) and Socio-Political Events in Kazakhstan in the 1920s–1930s",era:"Soviet statehood, NEP and social change"},
+  {name:"Week 10 · Kazakhstan in the Years of Industrialization and Collectivization (Late 1920s–1930s)",era:"Economic transformation and repression"},
+  {name:"Week 11 · Kazakhstan in the Great Patriotic War and Post-War Years (1941–1965)",era:"War, reconstruction and the Khrushchev decade"},
+  {name:"Week 12 · The Social and Political Life, Economics and Culture of Kazakhstan from 1965 to 1991",era:"Stagnation, perestroika and sovereignty"},
+  {name:"Week 13 · The Collapse of the USSR and the Formation of Independent Kazakhstan",era:"State-building and modernization"},
+  {name:"Week 14 · Kazakhstan in the New Geo-Economic and Geo-Political Conditions (1991–2025)",era:"Foreign policy and international integration"},
+  {name:"Week 15 · New Kazakhstan: The Path to Renewal and Modernization",era:"Socio-political reforms, 2022–2025"}
+];
+
+const syllabusQuestionBank = [
+  uniqueQuestions([LEGACY_QUESTION_BANK[0], week1FromAncient]),
+  uniqueQuestions([week2EarlyIron]),
+  uniqueQuestions([LEGACY_QUESTION_BANK[2], LEGACY_QUESTION_BANK[3], LEGACY_QUESTION_BANK[4]]),
+  uniqueQuestions([LEGACY_QUESTION_BANK[5]]),
+  uniqueQuestions([LEGACY_QUESTION_BANK[6], LEGACY_QUESTION_BANK[7]]),
+  uniqueQuestions([LEGACY_QUESTION_BANK[8]]),
+  uniqueQuestions([LEGACY_QUESTION_BANK[9]]),
+  [],
+  uniqueQuestions([week9Political, WEEK_9_EXTRA_QUESTIONS]),
+  uniqueQuestions([week10Economic, WEEK_10_EXTRA_QUESTIONS]),
+  uniqueQuestions([LEGACY_QUESTION_BANK[11], week11Postwar]),
+  uniqueQuestions([week12LateSoviet, WEEK_12_EXTRA_QUESTIONS]),
+  uniqueQuestions([week13Formation]),
+  uniqueQuestions([week14GeoPolitics, WEEK_14_EXTRA_QUESTIONS]),
+  uniqueQuestions([NEW_KAZAKHSTAN_QUESTIONS])
+];
+syllabusQuestionBank[7] = uniqueQuestions(syllabusQuestionBank.slice(0, 7));
+syllabusTopics.forEach(function(topic, index){ topic.count = syllabusQuestionBank[index].length; });
+TOPICS.splice(0, TOPICS.length);
+Array.prototype.push.apply(TOPICS, syllabusTopics);
+QUESTION_BANK.splice(0, QUESTION_BANK.length);
+Array.prototype.push.apply(QUESTION_BANK, syllabusQuestionBank);
+
 const QUESTIONS_PER_QUIZ = 30;
 const TIME_PER_QUESTION = 15;
 
@@ -729,13 +848,28 @@ function shuffle(arr){
 }
 function buildPool(topicIndex){
   if (topicIndex === null){
-    const pool = [];
-    QUESTION_BANK.forEach(function(list, ti){
-      list.forEach(function(item){ pool.push(Object.assign({topicIndex:ti}, item)); });
-    });
-    return pool;
+    const contentWeeks = TOPICS.map(function(topic, index){ return topic.reviewWeeks ? null : index; }).filter(function(index){ return index !== null; });
+    return buildBalancedPool(contentWeeks, QUESTIONS_PER_QUIZ);
   }
+  if (TOPICS[topicIndex].reviewWeeks){ return buildBalancedPool(TOPICS[topicIndex].reviewWeeks, QUESTIONS_PER_QUIZ); }
   return QUESTION_BANK[topicIndex].map(function(item){ return Object.assign({topicIndex:topicIndex}, item); });
+}
+
+function buildBalancedPool(topicIndexes, limit){
+  const buckets = shuffle(topicIndexes).map(function(topicIndex){
+    return shuffle(QUESTION_BANK[topicIndex]).map(function(item){ return Object.assign({topicIndex:topicIndex}, item); });
+  });
+  const result = [];
+  let round = 0;
+  while (result.length < limit){
+    let added = false;
+    for (let i=0;i<buckets.length && result.length<limit;i++){
+      if (round < buckets[i].length){ result.push(buckets[i][round]); added = true; }
+    }
+    if (!added) break;
+    round++;
+  }
+  return result;
 }
 
 // ---------- dashboard ----------
@@ -746,7 +880,7 @@ const fcGrid = document.getElementById('flashcards-topics-grid');
 });
 setTimeout(function(){ renderDashboard(); renderFlashcardsIntro(); }, 550);
 
-const FOCUS_TOPIC_INDEX = TOPICS.findIndex(function(t){ return t.name === 'Stone Age'; });
+const DEFAULT_TOPIC_INDEX = 0;
 
 function buildTopicCardEl(t, i, stats){
   const st = stats[i];
@@ -759,14 +893,10 @@ function buildTopicCardEl(t, i, stats){
   }
   const el = document.createElement('div');
   el.className = 'card clickable topic-card';
-  const isFocus = i === FOCUS_TOPIC_INDEX;
-  if (isFocus){ el.style.borderColor = 'var(--primary-500)'; el.style.background = 'var(--primary-50)'; }
-  const badge = isFocus ? '<span class="badge" style="background:var(--primary-100);color:var(--primary-600);margin-bottom:4px;">Current focus</span>' : '';
   el.innerHTML =
-    badge +
     '<div class="topic-top"><p class="topic-name">'+t.name+'</p><span class="topic-score '+scoreClass+'">'+scoreText+'</span></div>'+
     '<p class="topic-era">'+t.era+'</p>'+
-    '<p class="topic-count">'+t.count+' practice question'+(t.count===1?'':'s')+'</p>';
+    '<p class="topic-count">'+(t.reviewWeeks ? '30-question balanced review' : t.count+' practice question'+(t.count===1?'':'s'))+'</p>';
   return el;
 }
 function renderTopicGrid(container, stats, onClick){
@@ -794,19 +924,13 @@ function generateQuiz(topicIndex){
   quiz = {items:items, index:0, correct:0, topicIndex:topicIndex};
 }
 function startTests(){
-  // Если квиз уже идёт — просто возвращаемся к нему,
-  // не перерисовывая и не сбрасывая текущий вопрос.
-  if (quiz && quiz.index < quiz.items.length){
-    goto('quiz');
-    return;
-  }
-
-  generateQuiz(FOCUS_TOPIC_INDEX);
+  if (quiz && quiz.index < quiz.items.length){ goto('quiz'); return; }
+  generateQuiz(DEFAULT_TOPIC_INDEX);
   goto('quiz');
   renderQuizQuestion();
 }
 document.getElementById('start-test-btn').addEventListener('click', function(){
-  generateQuiz(FOCUS_TOPIC_INDEX); goto('quiz'); renderQuizQuestion();
+  generateQuiz(DEFAULT_TOPIC_INDEX); goto('quiz'); renderQuizQuestion();
 });
 document.getElementById('start-mixed-btn').addEventListener('click', function(){
   generateQuiz(null); goto('quiz'); renderQuizQuestion();
@@ -939,7 +1063,7 @@ function renderFlashcardsIntro(){
   });
 }
 document.getElementById('start-flashcards-btn').addEventListener('click', function(){
-  generateFlashcards(FOCUS_TOPIC_INDEX); goto('flashcards'); renderFlashcard();
+  generateFlashcards(DEFAULT_TOPIC_INDEX); goto('flashcards'); renderFlashcard();
 });
 document.getElementById('start-mixed-flashcards-btn').addEventListener('click', function(){
   generateFlashcards(null); goto('flashcards'); renderFlashcard();
