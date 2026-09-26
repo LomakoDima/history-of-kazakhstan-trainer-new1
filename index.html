@@ -394,6 +394,7 @@
   </nav>
 </div>
 
+<script src="supplemental-questions.js"></script>
 <script>
 // ---------- icons ----------
 function ic(path,size){size=size||16;return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg>';}
@@ -823,8 +824,28 @@ const syllabusQuestionBank = [
   uniqueQuestions([week14GeoPolitics, WEEK_14_EXTRA_QUESTIONS]),
   uniqueQuestions([NEW_KAZAKHSTAN_QUESTIONS])
 ];
-syllabusQuestionBank[7] = uniqueQuestions(syllabusQuestionBank.slice(0, 7));
-syllabusTopics.forEach(function(topic, index){ topic.count = syllabusQuestionBank[index].length; });
+
+const syllabusSupplements = globalThis.SYLLABUS_SUPPLEMENTS || {};
+Object.keys(syllabusSupplements).forEach(function(index){
+  syllabusQuestionBank[index] = uniqueQuestions([syllabusQuestionBank[index], syllabusSupplements[index]]);
+});
+
+function takeBalancedQuestions(lists, limit){
+  const result = [];
+  let round = 0;
+  while (result.length < limit){
+    let added = false;
+    for (let i=0;i<lists.length && result.length<limit;i++){
+      if (round < lists[i].length){ result.push(lists[i][round]); added = true; }
+    }
+    if (!added) break;
+    round++;
+  }
+  return result;
+}
+
+syllabusQuestionBank[7] = takeBalancedQuestions(syllabusQuestionBank.slice(0, 7), 30);
+syllabusTopics.forEach(function(topic){ topic.count = 30; });
 TOPICS.splice(0, TOPICS.length);
 Array.prototype.push.apply(TOPICS, syllabusTopics);
 QUESTION_BANK.splice(0, QUESTION_BANK.length);
@@ -852,12 +873,24 @@ function buildPool(topicIndex){
     return buildBalancedPool(contentWeeks, QUESTIONS_PER_QUIZ);
   }
   if (TOPICS[topicIndex].reviewWeeks){ return buildBalancedPool(TOPICS[topicIndex].reviewWeeks, QUESTIONS_PER_QUIZ); }
-  return QUESTION_BANK[topicIndex].map(function(item){ return Object.assign({topicIndex:topicIndex}, item); });
+  return QUESTION_BANK[topicIndex].map(function(item){ return prepareQuestion(item, topicIndex); });
+}
+
+function prepareQuestion(item, topicIndex){
+  const options = shuffle(item.options.map(function(text, index){
+    return {text:text, correct:index === item.correct};
+  }));
+  return {
+    topicIndex:topicIndex,
+    q:item.q,
+    options:options.map(function(option){ return option.text; }),
+    correct:options.findIndex(function(option){ return option.correct; })
+  };
 }
 
 function buildBalancedPool(topicIndexes, limit){
   const buckets = shuffle(topicIndexes).map(function(topicIndex){
-    return shuffle(QUESTION_BANK[topicIndex]).map(function(item){ return Object.assign({topicIndex:topicIndex}, item); });
+    return shuffle(QUESTION_BANK[topicIndex]).map(function(item){ return prepareQuestion(item, topicIndex); });
   });
   const result = [];
   let round = 0;

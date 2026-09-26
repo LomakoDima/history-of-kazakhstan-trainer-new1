@@ -6,6 +6,7 @@ import { spawn } from "node:child_process";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const htmlPath = path.join(root, "index.html");
+const supplementalQuestionsPath = path.join(root, "supplemental-questions.js");
 const port = Number(process.env.PORT || 8787);
 const apiKey = process.env.OPENAI_API_KEY;
 const model = process.env.OPENAI_MODEL || "gpt-5-mini";
@@ -159,6 +160,16 @@ const server = http.createServer(async (req, res) => {
     } catch {
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
       return res.end("Trainer HTML file was not found next to server.mjs.");
+    }
+  }
+  if (req.method === "GET" && req.url === "/supplemental-questions.js") {
+    try {
+      const script = await fs.readFile(supplementalQuestionsPath);
+      res.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store" });
+      return res.end(script);
+    } catch {
+      res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+      return res.end("Supplemental question bank was not found next to server.mjs.");
     }
   }
   res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
