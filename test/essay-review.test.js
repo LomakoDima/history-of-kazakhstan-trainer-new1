@@ -153,7 +153,7 @@ test("Vercel handler returns the review and rejects foreign origins", async () =
 
 test("local server serves the app and the review endpoint", async () => {
   const port = 20000 + Math.floor(Math.random() * 20000);
-  const child = spawn(process.execPath, ["server.mjs"], {
+  const child = spawn(process.execPath, ["local-server.mjs"], {
     cwd: root,
     env: { ...process.env, PORT: String(port), NO_BROWSER: "1", ANTHROPIC_BASE_URL: fakeUrl, ANTHROPIC_API_KEY: "test-key" },
     stdio: ["ignore", "pipe", "inherit"]
@@ -169,7 +169,7 @@ test("local server serves the app and the review endpoint", async () => {
     assert.match(await page.text(), /Oral Exam Trainer/);
     const supplements = await fetch(base + "/supplemental-questions.js");
     assert.equal(supplements.status, 200);
-    assert.equal((await fetch(base + "/server.mjs")).status, 404, "source files are not served");
+    assert.equal((await fetch(base + "/local-server.mjs")).status, 404, "source files are not served");
 
     const review = await fetch(base + "/api/evaluate", {
       method: "POST", headers: { "Content-Type": "application/json", Origin: "null" },

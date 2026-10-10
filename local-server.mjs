@@ -76,7 +76,7 @@ const server = http.createServer(async (req, res) => {
       return res.end(body);
     } catch {
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-      return res.end(asset.file + " was not found next to server.mjs.");
+      return res.end(asset.file + " was not found next to local-server.mjs.");
     }
   }
   res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });

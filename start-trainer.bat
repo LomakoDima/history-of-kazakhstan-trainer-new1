@@ -18,7 +18,7 @@ if not exist "node_modules\@anthropic-ai\sdk" (
 )
 if exist ".env" (
   echo Loading settings from .env...
-  node --env-file-if-exists=.env server.mjs
+  node --env-file-if-exists=.env local-server.mjs
   pause
   exit /b %errorlevel%
 )
@@ -30,5 +30,5 @@ if "%ANTHROPIC_API_KEY%"=="" (
 if "%ANTHROPIC_API_KEY%"=="" (
   echo No API key was entered. The trainer will start without AI review.
 )
-node server.mjs
+node local-server.mjs
 pause

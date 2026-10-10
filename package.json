@@ -5,9 +5,9 @@
   "type": "module",
   "description": "English-language oral exam trainer for the History of Kazakhstan",
   "scripts": {
-    "start": "node server.mjs",
-    "dev": "node --env-file-if-exists=.env server.mjs",
-    "check": "node --check server.mjs && node --check lib/essay-review.js && node --check api/evaluate.js && node --check supplemental-questions.js",
+    "start": "node local-server.mjs",
+    "dev": "node --env-file-if-exists=.env local-server.mjs",
+    "check": "node --check local-server.mjs && node --check lib/essay-review.js && node --check api/evaluate.js && node --check supplemental-questions.js",
     "test": "node --test"
   },
   "dependencies": {
