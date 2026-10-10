@@ -223,7 +223,7 @@
   <div class="main">
     <header class="topbar">
       <div class="breadcrumb" id="breadcrumb">History of Kazakhstan / Overview</div>
-      <span class="build-badge">v4 · AI Review</span>
+      <span class="build-badge">v5 · Claude Review</span>
       <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme"></button>
     </header>
 
@@ -242,6 +242,7 @@
         <button class="btn btn-secondary" data-view="flashcards">Flashcard Review</button>
         <button class="btn btn-secondary" data-view="essay">Written Practice</button>
       </div>
+      <button id="reset-progress-btn" style="background:none;border:none;color:var(--text-muted);font-size:12px;cursor:pointer;padding:0;margin:10px 0 0 16px;text-decoration:underline;">Reset saved progress</button>
       <button id="start-mixed-btn" style="background:none;border:none;color:var(--primary-500);font-size:13px;cursor:pointer;padding:0;margin-top:10px;text-decoration:underline;">Or run a balanced Mixed round across the whole syllabus</button>
 
       <h2 style="margin-top:28px;">Quiz by Syllabus Week</h2>
@@ -371,7 +372,7 @@
         <section class="ai-review" id="ai-review">
           <div class="ai-review-head">
             <div>
-              <h2>OpenAI Essay Review</h2>
+              <h2>Claude Essay Review</h2>
               <p class="subtitle" style="margin:0;">Automatic feedback using four teacher criteria.</p>
             </div>
             <button class="btn btn-secondary" id="ai-review-btn" type="button">Run AI Review</button>
@@ -413,8 +414,11 @@ function setTheme(t){
   document.documentElement.dataset.theme = t;
   document.getElementById('theme-toggle').innerHTML = t === 'dark' ? ic(ICONS.sun,16) : ic(ICONS.moon,16);
   document.getElementById('theme-toggle-desktop').textContent = t === 'dark' ? 'Light mode' : 'Dark mode';
+  try { localStorage.setItem('kz-history-trainer-theme', t); } catch (e) { /* storage unavailable */ }
 }
-setTheme('light');
+let savedTheme = 'light';
+try { savedTheme = localStorage.getItem('kz-history-trainer-theme') === 'dark' ? 'dark' : 'light'; } catch (e) { /* storage unavailable */ }
+setTheme(savedTheme);
 document.getElementById('theme-toggle').addEventListener('click', function(){
   setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
 });
@@ -443,37 +447,14 @@ function startFlashcardsNav(){
 document.querySelectorAll('[data-view]').forEach(function(b){ b.addEventListener('click', function(){ navigate(b.dataset.view); }); });
 
 // ---------- data ----------
-const TOPICS = [{"name": "Stone Age", "era": "Paleolithic – Eneolithic", "count": 39}, {"name": "Ancient Kazakhstan", "era": "Bronze Age – 6th c. BCE", "count": 28}, {"name": "Turkic Khaganates", "era": "6th–9th c.", "count": 23}, {"name": "Karakhanids & Kipchaks", "era": "9th–13th c.", "count": 13}, {"name": "The Silk Road", "era": "Material culture", "count": 7}, {"name": "Golden Horde & Moghulistan", "era": "13th–15th c.", "count": 24}, {"name": "The Kazakh Khanate", "era": "15th–17th c.", "count": 21}, {"name": "Dzungar Wars", "era": "18th c.", "count": 14}, {"name": "Russian Empire", "era": "19th c.", "count": 18}, {"name": "1916 Revolt & Alash", "era": "Early 20th c.", "count": 10}, {"name": "Soviet Kazakhstan", "era": "1920s–1930s", "count": 13}, {"name": "World War II", "era": "1941–1945", "count": 9}, {"name": "Thaw & Zheltoksan", "era": "1945–1991", "count": 7}, {"name": "Independent Kazakhstan", "era": "Since 1991", "count": 26}];
+// Filled in below once the syllabus structure is built.
+const TOPICS = [];
 const QUESTION_BANK = [[{"q": "When does the Paleolithic era begin?", "options": ["With the start of metalworking", "From the moment of human emergence", "With the appearance of agriculture and cattle breeding", "With the onset of the Ice Age"], "correct": 1}, {"q": "Into how many periods is the Paleolithic era divided?", "options": ["Into 2 periods", "Into 3 periods", "Into 4 periods", "Into 5 periods"], "correct": 1}, {"q": "What is the overall chronological timeframe of the Paleolithic era?", "options": ["2.6 million – 12 thousand years ago", "140 thousand – 40 thousand years ago", "3 million – 10 thousand years ago", "40 thousand – 12 thousand years ago"], "correct": 0}, {"q": "Which timeframe does the Early Paleolithic cover?", "options": ["140 thousand – 40 thousand years ago", "2.6 million – 140 thousand years ago", "40 thousand – 12 thousand years ago", "2.6 million – 12 thousand years ago"], "correct": 1}, {"q": "What is the timeframe of the Middle Paleolithic?", "options": ["2.6 million – 140 thousand years ago", "40 thousand – 12 thousand years ago", "140 thousand – 40 thousand years ago", "50 thousand – 10 thousand years ago"], "correct": 2}, {"q": "According to the text, which period does the Late Paleolithic (Mousterian) cover?", "options": ["2.6 million – 140 thousand years ago", "140 thousand – 40 thousand years ago", "40 thousand – 12 thousand years ago", "12 thousand – 5 thousand years ago"], "correct": 2}, {"q": "When did the period of planetary cooling (glaciation) begin?", "options": ["500 thousand years ago", "250 thousand years ago", "14–13 thousand years BC", "40 thousand years ago"], "correct": 1}, {"q": "Which ancient humans adapted best to the cold climate of the border territories?", "options": ["Australopithecus and Pithecanthropus", "Sinanthropus and Neanderthals", "Cro-Magnons and Dryopithecus", "Homo habilis and Dryopithecus"], "correct": 1}, {"q": "Approximately how long ago did primitive humans enter the territory of Kazakhstan?", "options": ["2.6 million years ago", "1 million years ago", "500 thousand years ago", "140 thousand years ago"], "correct": 1}, {"q": "What are primitive tools made from river pebbles in the form of hand axes (primitive axes) called?", "options": ["Choppings", "Nuclei", "Unifaces", "Bifaces"], "correct": 0}, {"q": "Where and when were the remains of \"Homo habilis\" found by archaeologists?", "options": ["In 1891 on Java Island", "In 1927 in China", "In 1960 in Tanzania (Olduvai Gorge)", "In 1938 in Uzbekistan"], "correct": 2}, {"q": "Which Soviet anthropologist performed the facial reconstruction of the Neanderthal boy from Teshik-Tash cave?", "options": ["A. Okladnikov", "K. Satpayev", "M. Gerasimov", "Kh. Alpysbayev"], "correct": 2}, {"q": "Contemporaries of which ancient human species were the first people to settle in Kazakhstan?", "options": ["Australopithecus and Cro-Magnon", "Pithecanthropus and Sinanthropus", "Exclusively Cro-Magnons", "Homo habilis and Neanderthal"], "correct": 1}, {"q": "Which of the following Stone Age sites are listed as the oldest?", "options": ["Semizbugy and Karasu", "Shakpakata and Arystandy", "Kazangap and Borigazgan", "Tanirkazgan and Ch. Valikhanov site"], "correct": 1}, {"q": "How many stone items did archaeologists collect at the Karasu site?", "options": ["About 300 items", "About 1.5 thousand items", "About 50 thousand items", "About 15 thousand items"], "correct": 3}, {"q": "Which main cultures make up the Early (Lower) Paleolithic?", "options": ["Mousterian and Solutrean", "Magdalenian and Aurignacian", "Oldowan and Acheulean", "Kelteminar and Botai"], "correct": 2}, {"q": "What type of occupations/economy did the first humans have?", "options": ["Producing", "Appropriating", "Trade-based", "Agrarian"], "correct": 1}, {"q": "Which biological species finally defeated the Neanderthals and became the main human species during the Mesolithic era?", "options": ["Australopithecus", "Homo sapiens", "Pithecanthropus", "Sinanthropus"], "correct": 1}, {"q": "What is the main chronological framework of the Mesolithic era?", "options": ["40th–12th millennia BC", "7th–3rd millennia BC", "12th–5th millennia BC", "2.6 million – 800 thousand years BC"], "correct": 2}, {"q": "What are microliths?", "options": ["Small stone tools 1–2 cm in length", "Large stone hand axes", "Tools made of bone and antler", "Clay vessels for food storage"], "correct": 0}, {"q": "How many Mesolithic sites in total have been discovered by archaeological research in Kazakhstan?", "options": ["About 300 sites", "More than 500 sites", "About 100 sites", "Only about 20 sites"], "correct": 3}, {"q": "When did the process of domesticating wild animals and cultivating certain plants begin?", "options": ["At the beginning of the Early Paleolithic", "At the end of the Mesolithic", "In the middle of the Late Paleolithic", "At the end of the Eneolithic"], "correct": 1}, {"q": "In which era did the new weapon — the bow and arrow — appear?", "options": ["Paleolithic", "Eneolithic", "Mesolithic", "Neolithic"], "correct": 2}, {"q": "Which three Neolithic archaeological cultures are well-studied in Kazakhstan?", "options": ["Andronovo, Begazy-Dandybay, Sargar", "Kelteminar, Atbasar, Dzhebel", "Oldowan, Acheulean, Mousterian", "Botai, Makhanzhar, Khvalynsk"], "correct": 1}, {"q": "What is the Neolithic Revolution?", "options": ["Transition from appropriating forms of economy to producing labor", "Invention of the bow and arrow for individual hunting", "Overload of ancient cultures and transition to ironworking", "Development of high-mountain territories and caves"], "correct": 0}, {"q": "Which types of economy did people transition to as a result of the Neolithic Revolution (to producing labor)?", "options": ["To gathering and fishing", "To forest burning and driven hunting", "To microlith manufacturing and spear making", "To cattle breeding and agriculture"], "correct": 3}, {"q": "What is another name for the Neolithic era?", "options": ["Era of microliths", "Age of clay pots", "Age of bronze axes", "Late Paleolithic"], "correct": 1}, {"q": "Where was the Dzhebel archaeological culture found?", "options": ["On Ustyurt", "In Prieisilye", "In the Amudarya River valley", "In Altai"], "correct": 0}, {"q": "What is the Dzeytun culture, closely linked to the Dzhebel economy, known for?", "options": ["It was the first culture to master iron smelting", "It was the oldest agricultural culture in the region", "It was a culture of nomadic horse riders", "It was the largest fishing culture of the Aral region"], "correct": 1}, {"q": "Which animals were domesticated by the people of the Dzhebel culture?", "options": ["Horses and cows", "Sheep and goats", "Camels and dogs", "Reindeer and pigs"], "correct": 1}, {"q": "Which archaeologist discovered the Eneolithic site of Botai in North Kazakhstan?", "options": ["V. Seibert", "K. Akishev", "A. Margulan", "Kh. Alpysbaev"], "correct": 0}, {"q": "Representatives of which culture were the first horse breeders of the Eurasian steppes to domesticate the horse?", "options": ["Kelteminar", "Botai", "Atbasar", "Dzhebel"], "correct": 1}, {"q": "Bones of which animal, numbering over 70 thousand, were discovered at the Botai site?", "options": ["Dog", "Goat", "Horse", "Cow"], "correct": 2}, {"q": "In which region of Kazakhstan was the Botai culture located?", "options": ["South Kazakhstan", "East Kazakhstan", "North Kazakhstan", "West Kazakhstan"], "correct": 2}, {"q": "What did the inhabitants of the Shebir site make necklaces and jewelry from?", "options": ["From bird bones", "From river pearls", "From sea mollusks", "From semi-precious stones"], "correct": 2}, {"q": "What is the chronological framework of the Eneolithic era in Kazakhstan?", "options": ["12th–5th millennium BC", "5th–3rd millennium BC", "3rd–2nd millennium BC", "2nd–1st millennium BC"], "correct": 2}, {"q": "What is the main technological achievement of the Eneolithic era?", "options": ["Appearance of the first copper products while retaining stone tools", "Beginning of iron and cast iron smelting", "Complete abandonment of stone tools", "Invention of the potter's wheel"], "correct": 0}, {"q": "What indicated the emergence of property inequality in the Eneolithic era?", "options": ["The use of pottery", "The appearance of collective burials", "The appearance of individual burials", "The transition to a tribal community"], "correct": 2}, {"q": "What is totemism?", "options": ["Belief in human kinship with an animal — the patron of the clan", "Worship of inanimate objects and talismans", "Belief in the animacy of all natural phenomena", "Worship of the spirits of deceased ancestors"], "correct": 0}], [{"q": "People learned to grind, drill, and saw stone in the", "options": ["Late Paleolithic", "Mesolithic", "Middle Paleolithic", "Neolithic", "Eneolithic (Chalcolithic)"], "correct": 1}, {"q": "Humans achieved fire-making by friction in the", "options": ["Mesolithic", "Late Paleolithic", "Eneolithic", "Middle Paleolithic", "Early Paleolithic"], "correct": 3}, {"q": "The most favorable areas for ancient human settlement were the mountains of", "options": ["Tarbagatai", "Karatau", "Alatau", "Tian Shan", "Mugodzhar"], "correct": 1}, {"q": "An ancient Bronze Age city", "options": ["Arkaim", "Ispijab", "Otrar", "Taraz", "Yasy"], "correct": 0}, {"q": "In the Bronze Age, the territory of Kazakhstan was settled by tribes of the", "options": ["Sakas", "Andronovo culture", "Usun", "Turks", "Huns"], "correct": 1}, {"q": "More than 30 settlements and over 150 burial grounds of the Andronovo culture have been found in the territory of", "options": ["Southern", "Central", "Eastern", "Western", "Northern Kazakhstan"], "correct": 1}, {"q": "According to anthropologist O. Ismagulov, the Andronovans' facial features resemble those of", "options": ["the Karakalpaks and Karakytais", "the Mangyts and Nogais", "the Zhalayyrs and Albans", "the Sakas, Sarmatians, and Usun", "the Argyns and Kipchaks"], "correct": 3}, {"q": "The era of the discovery and use of iron began in", "options": ["the 1st-2nd centuries CE", "the 15th-12th centuries BCE", "the 20th-15th centuries BCE", "the 4th-3rd centuries BCE", "the 8th-6th centuries BCE"], "correct": 4}, {"q": "What is the common name for the first tribal unions on the territory of Kazakhstan", "options": ["the Huns", "the Usun", "the Kangju", "the Sakas", "the Turks"], "correct": 3}, {"q": "In what century did Alexander the Great fight against the Sakas", "options": ["the 7th century BCE", "the 6th century BCE", "the 4th century BCE", "the 1st century BCE", "the 2nd century BCE"], "correct": 2}, {"q": "The Asian Scythians are the name given to the", "options": ["Kipchaks", "Sakas", "Mongols", "Turks", "Usun"], "correct": 1}, {"q": "Sakan society was divided into three groups", "options": ["chiefs, begs, commoners", "warriors, priests, commoners", "kings, emirs, commoners", "chiefs, peasants, commoners", "kings, priestesses, commoners"], "correct": 1}, {"q": "The type of social order among the Sakas was", "options": ["the family community", "military democracy", "a slave-owning system", "a feudal system", "the clan community"], "correct": 1}, {"q": "Women in Sakan society enjoyed", "options": ["the right to vote", "unlimited rights", "rights equal to men", "no rights", "limited rights"], "correct": 2}, {"q": "Artworks of the 1st millennium BCE belong to the", "options": ["\"animal style\"", "\"floral style\"", "\"geometric style\"", "\"mixed style\"", "\"ornamental style\""], "correct": 0}, {"q": "Whose writings contain information about the ancient Sakas", "options": ["Sima Qian", "Herodotus", "Muhammad Haidar", "Ibn Fadlan", "Mahmud al-Kashgari"], "correct": 1}, {"q": "The title \"Chanyu\" was held by the ruler of the", "options": ["Huns", "Kangju", "Usun", "Turks", "Sakas"], "correct": 0}, {"q": "The migration of the Huns to the territory of Kazakhstan is associated with the name of Chanyu", "options": ["Balamber", "Attila", "Zhizhi", "Liu Bang", "Modu"], "correct": 2}, {"q": "The campaigns of the Huns contributed to the collapse, in Europe, of", "options": ["the clan community", "the military-democratic system", "the feudal system", "the slave-owning system", "the family community"], "correct": 3}, {"q": "The thousand-, hundred-, and ten-men commanders of the Hun army were appointed by the", "options": ["Chanyu", "vizier", "council of elders", "temnik (commander of ten thousand)", "military council"], "correct": 3}, {"q": "In the 3rd-5th centuries CE, Hun art developed the", "options": ["wood carving", "geometric ornament", "polychrome style", "animal style", "pressed-relief technique"], "correct": 2}, {"q": "The Usun capital, the city of Chiguchen, was located", "options": ["in the Chu River valley", "on the shore of Lake Issyk-Kul", "in the Talas River valley", "in the Ili valley", "on the border with China"], "correct": 1}, {"q": "What title did the Usun ruler hold", "options": ["tsar", "jabgu", "yabgu", "gunmo", "eltebir"], "correct": 3}, {"q": "1,300 coins from the 3rd-4th centuries CE, found in the Syr Darya region, belonged to the", "options": ["Kangju", "Huns", "Massagetae", "Avars", "Usun"], "correct": 0}, {"q": "The site of Kok-Mardan was a center of the urban culture of the", "options": ["Usun", "Huns", "Massagetae", "Avars", "Kangju"], "correct": 4}, {"q": "The term \"Sarmatians\" appears in the writings of ancient authors from", "options": ["the 1st century CE", "the 2nd century BCE", "the 1st century BCE", "the 5th century CE", "the 3rd century BCE"], "correct": 4}, {"q": "The life and customs of nomads in the 3rd-2nd centuries BCE were described in the \"Records of the Grand Historian\" by", "options": ["Strabo", "Balasaguni", "Sima Qian", "Marco Polo", "al-Kashgari"], "correct": 2}, {"q": "On the orders of Alexander the Great, a city was built on the bank of the Syr Darya", "options": ["Taraz", "Ili", "Chu", "Alexandria Eschate (on the Syr Darya)", "Talas"], "correct": 3}], [{"q": "When was the Turkic Khaganate founded", "options": ["542", "552", "562", "756", "603"], "correct": 1}, {"q": "In 553, the Rouran Khaganate fell into decline after being defeated by the", "options": ["Chinese", "Turks", "Usun", "Kangju", "Hephthalites"], "correct": 1}, {"q": "With which state did the Turks conclude an anti-Hephthalite alliance in 561-563", "options": ["Byzantium", "Volga Bulgaria", "China", "Persia (Iran)", "the Samanids"], "correct": 3}, {"q": "The Turkic Khaganate's embassy to Constantinople led by Maniakh (568) concluded an agreement against", "options": ["the Hephthalites", "China", "Persia (Iran)", "the Khwarazmshah", "the Arabs"], "correct": 2}, {"q": "Ishbar Elteris introduced the \"on ok budun\" (Ten Arrows) system of administration in the", "options": ["Karluk Khaganate", "Eastern Turkic Khaganate", "Turkic Khaganate", "Western Turkic Khaganate", "Turgesh Khaganate"], "correct": 3}, {"q": "Commoner-herders in the Western Turkic Khaganate were called", "options": ["tarkhans", "buruks", "kara budun", "yabgu", "shads"], "correct": 2}, {"q": "The Arabs called the ruler of the Turgesh Khaganate, Suluk Khagan", "options": ["\"the Butting One\"", "\"the Stubborn One\"", "\"the Brave One\"", "\"the Bold One\"", "\"the Timid One\""], "correct": 0}, {"q": "The founder of the Turgesh Khaganate, who began the fight against the Arabs", "options": ["Uch-Elig Khagan", "Sakal Khagan", "Bumin", "Suluk", "Mukhan"], "correct": 0}, {"q": "The Turgesh were divided into", "options": ["green and black", "green and yellow", "white and black", "green and white", "yellow (sary) and black (kara)"], "correct": 4}, {"q": "A major trade center of the Turgesh Khaganate was the city of", "options": ["Zhanakent", "Taraz", "Otrar", "Koylyk", "Suyab"], "correct": 1}, {"q": "In 748, invading Chinese troops captured the city of", "options": ["Suyab", "Taraz", "Sairam", "Farab", "Balasagun"], "correct": 0}, {"q": "The Battle of Talas took place in", "options": ["760", "745", "751", "840", "756"], "correct": 2}, {"q": "In the mid-8th century, the Karluk Khaganate was founded in the territory of", "options": ["Zhetysu (Semirechye)", "the Aral region", "Northern Kazakhstan", "Transoxiana", "Kashgaria"], "correct": 0}, {"q": "In 746, the Karluks were defeated by the Uyghur Khaganate and moved to", "options": ["Western Kazakhstan", "Semirechye (Zhetysu)", "the Syr Darya region", "the Ural region", "the Irtysh region"], "correct": 1}, {"q": "The Oghuz capital in the 10th century", "options": ["Taraz", "Sygnak", "Yangikent", "Turkistan", "Balasagun"], "correct": 2}, {"q": "The head of the Oghuz held the title of", "options": ["kul-erkin", "yabgu", "shad", "khagan", "eltebir"], "correct": 1}, {"q": "At the end of the 10th century, the Oghuz campaigned against the Khazar Khaganate in alliance with", "options": ["the Mongol state", "the Kipchak state", "the Kimek state", "the Karluk state", "Kievan Rus"], "correct": 4}, {"q": "The Oghuz state fell under the onslaught of the", "options": ["Chinese", "Seljuks", "Karluks", "Oirats", "Kipchaks"], "correct": 1}, {"q": "Where was the headquarters of the Kimek khagans located", "options": ["on the Irtysh", "on the Syr Darya", "on the Ural", "on the Yaik", "on the Tobol"], "correct": 0}, {"q": "The largest tribe under the influence of the Kimek Khaganate was the", "options": ["Kipchaks", "Kereites", "Oghuz", "Argyns", "Naimans"], "correct": 0}, {"q": "The largest monuments of ancient Turkic writing are the inscriptions", "options": ["\"Bumin\" and \"Ishtemi\"", "\"Mukhan\" and \"Sudu\"", "\"Ushlik\" and \"Sakal\"", "\"Kasym\" and \"Zhanibek\"", "\"Kul Tigin\" and \"Tonyukuk\""], "correct": 4}, {"q": "The ancient Turkic stelae in honor of Bilge Khagan and Kul Tigin were written in", "options": ["hieroglyphs", "runic script", "Uyghur script", "Sanskrit", "Sogdian script"], "correct": 1}, {"q": "Early medieval stone sculptures are called", "options": ["mazars", "balbals", "terracotta", "mosques", "mausoleums"], "correct": 1}], [{"q": "The founder of the Karakhanid dynasty", "options": ["Suluk", "Satuk Bughra Khan", "Mughan", "Sasy Buka", "Arslan Khan"], "correct": 1}, {"q": "The Karakhanid state was created in the 10th century in the territory of", "options": ["Zhetysu and Eastern Turkistan", "Eastern Kazakhstan", "the Aral region", "Central Kazakhstan", "Mongolia"], "correct": 0}, {"q": "The capital of the eastern Karakhanid khanate was", "options": ["Turkistan", "Yangikent", "Balasagun", "Otrar", "Kashgar"], "correct": 2}, {"q": "In 999, the Karakhanids conquered the city of Bukhara, the capital of the", "options": ["Oghuz", "Seljuks", "Sogdians", "Samanids", "Turgesh"], "correct": 3}, {"q": "What is \"iqta\"", "options": ["an appanage land", "an administrative body", "the right to collect tax", "a land grant", "an executive body"], "correct": 2}, {"q": "What is \"waqf\"", "options": ["lands of the Muslim clergy", "a form of exploitation", "a type of tax", "communal labor", "a type of duty"], "correct": 0}, {"q": "Power over the Karakhanid state passed to the Kara-Khitai in the", "options": ["1170s", "1130s", "1250s", "1060s", "1040s"], "correct": 1}, {"q": "In 960, Islam was declared the state religion of the", "options": ["Kimeks", "Kipchaks", "Kara-Khitai", "Karakhanids", "Oghuz"], "correct": 3}, {"q": "In the 11th-12th centuries, the most numerous of the Turkic-speaking peoples were the", "options": ["Kipchaks", "Oghuz", "Kimeks", "Naimans", "Argyns"], "correct": 0}, {"q": "The headquarters of the left wing of the Kipchak tribes was the Syr Darya city of", "options": ["Sygnak", "Otrar", "Almalyk", "Saraichik", "Taraz"], "correct": 0}, {"q": "The mausoleum of Khoja Ahmed Yasawi is an architectural masterpiece of the", "options": ["13th-14th centuries", "15th-16th centuries", "16th-17th centuries", "17th-18th centuries", "14th-15th centuries"], "correct": 4}, {"q": "A work by Khoja Ahmed Yasawi", "options": ["\"Jami al-Tawarikh\"", "\"Kutadgu Bilig\"", "\"Diwan-i Hikmet\"", "\"Tarikh-i Rashidi\"", "the treatises of al-Farabi"], "correct": 2}, {"q": "The tradition of erecting stone balbals disappeared with the spread of", "options": ["Manichaeism", "Zoroastrianism", "Islam", "Buddhism", "Christianity"], "correct": 2}], [{"q": "The length of the Great Silk Road was approximately", "options": ["7,000 km", "2,000 km", "10,000 km", "12,000 km", "5,000 km"], "correct": 0}, {"q": "The main gateway of the Great Silk Road to the East was", "options": ["Transoxiana", "Western Kazakhstan", "Zhetysu (Semirechye)", "Mangystau", "the Ural region"], "correct": 2}, {"q": "Silk production was established at the turn of the era in", "options": ["the Kangju state", "the Usun state", "Sogdiana", "India", "Persia"], "correct": 2}, {"q": "According to Mahmud al-Kashgari, in the 6th century the city of Ispijab was known as", "options": ["Sygnak", "Sairam", "Farab", "Taraz", "Balasagun"], "correct": 1}, {"q": "The decline of trade along the Great Silk Road in the 13th century was linked to", "options": ["the Mongol invasion", "the Arab conquest", "the collapse of the Turkic Khaganate", "the opening of sea routes", "the creation of the Qing Empire"], "correct": 0}, {"q": "The hearth (oven) in the residential buildings of medieval cities of the 10th-12th centuries", "options": ["tashnau", "tandyr", "shahristan", "rabad", "korzhyn"], "correct": 1}, {"q": "The dome poles of a yurt are called", "options": ["uyk", "tunduk", "shanyrak", "chiy", "kerege"], "correct": 0}], [{"q": "The Mongol invasion of the territory of Kazakhstan began in", "options": ["1209", "1215", "1206", "1225", "1219"], "correct": 4}, {"q": "The pretext for the Mongol invasion was", "options": ["the weakening of Khwarazm", "the killing of a merchant caravan at Otrar", "a mass livestock die-off in Mongolia", "the breakdown of negotiations", "a mass livestock die-off in the Otrar oasis"], "correct": 1}, {"q": "The defense of the city of Otrar against the Mongols was led by", "options": ["Kadyr Khan", "Karaja Khan", "Shah Malik", "Khwarazmshah Muhammad", "Gayir Khan"], "correct": 4}, {"q": "A city in southern Kazakhstan that resisted the Mongols for 6 months", "options": ["Dzhend", "Uzgend", "Otrar", "Ashnas", "Sygnak"], "correct": 2}, {"q": "The eldest son of Genghis Khan was", "options": ["Jochi", "Chagatai", "Ogedei", "Tolui", "Kublai"], "correct": 0}, {"q": "Genghis Khan bequeathed the not-yet-conquered lands west of the Irtysh to", "options": ["Chagatai", "Jochi's son and his descendants", "Ogedei", "his wife", "Tolui"], "correct": 1}, {"q": "In written sources, the state founded by Batu was called", "options": ["the Golden Horde", "the Nogai Horde", "the White Horde (Ak Orda)", "Abulkhair's state", "Moghulistan"], "correct": 0}, {"q": "Who led the Mongol forces that invaded Eastern Europe", "options": ["Tolui", "Ogedei", "Batu", "Jochi", "Chagatai"], "correct": 2}, {"q": "Under which khan did the Golden Horde reach its greatest power in the first half of the 14th century", "options": ["Batu", "Uzbek Khan", "Jochi", "Urus", "Yerzen"], "correct": 1}, {"q": "Under which khan was Islam declared the state religion of the Golden Horde", "options": ["under Batu", "under Berke", "under Uzbek Khan", "under Tokhtamysh", "under Janibek"], "correct": 2}, {"q": "What language did the majority of the Golden Horde's population speak", "options": ["Chagatai", "Kipchak", "Kazakh", "Persian", "Mongolian"], "correct": 1}, {"q": "The bulk of the population of the Golden Horde was made up of", "options": ["the Kangly", "the Karluks", "the Kipchaks", "the Naimans", "the Bulgars"], "correct": 2}, {"q": "The White Horde (Ak Orda) arose in the territory of the ulus of", "options": ["Jebe", "Chagatai", "Subutai", "Jochi", "Malibet"], "correct": 3}, {"q": "Before crushing the Golden Horde, Emir Timur first struck at", "options": ["the White Horde (Ak Orda) and Moghulistan", "Moghulistan and Kashgaria", "the Nogai Horde", "Transoxiana", "the White Horde and the Blue Horde"], "correct": 0}, {"q": "The Golden Horde never recovered from the raids of", "options": ["Tokhtamysh Khan", "Emir Timur", "Uzbek Khan", "Berke Khan", "Esen Buqa Khan"], "correct": 1}, {"q": "In the mid-14th century, a state was created in the territory of southeastern Kazakhstan called", "options": ["Moghulistan", "the Golden Horde", "the White Horde", "the Nogai Horde", "the Khanate of Abulkhair"], "correct": 0}, {"q": "The state of Moghulistan was formed as a result of the disintegration of", "options": ["the Chagatai Ulus", "the Khanate of Abulkhair", "the White Horde", "the Blue Horde", "the Golden Horde"], "correct": 0}, {"q": "The city of Almalyk was the capital of", "options": ["the Khanate of Abulkhair", "Moghulistan", "the Golden Horde", "the Nogai Horde", "the White Horde"], "correct": 1}, {"q": "Under Tughlugh Timur, the state religion of Moghulistan was declared to be", "options": ["Manichaeism", "Buddhism", "Tengrism", "Christianity", "Islam"], "correct": 4}, {"q": "In historical sources, the \"Mangyt\" state referred to", "options": ["the state of the Timurids", "the Nogai Horde", "Moghulistan", "the White Horde", "the Khanate of Abulkhair"], "correct": 1}, {"q": "The Nogai Horde's capital, Saraichik, was founded", "options": ["on the lower Ural River", "on the lower Dnieper", "on the Syr Darya", "near Sarai-Batu", "in Zhetysu"], "correct": 0}, {"q": "The last capital of the Khanate of Abulkhair", "options": ["Sygnak", "Balasagun", "Otrar", "Sairam", "Taraz"], "correct": 0}, {"q": "The Khanate of Abulkhair existed during the period", "options": ["1438-1478", "1448-1488", "1418-1458", "1408-1448", "1428-1468"], "correct": 4}, {"q": "In historical sources, the \"state of the nomadic Uzbeks\" referred to", "options": ["the state of the Timurids", "the White Horde", "the state of Abulkhair", "the Nogai Horde", "Moghulistan"], "correct": 2}], [{"q": "The founders of the Kazakh Khanate", "options": ["Abulkhair and Esen Buqa", "Zhanibek and Kerei", "Jochi and Chagatai", "Burunduk and Kasym", "Timur and Shaybani"], "correct": 1}, {"q": "Zhanibek and Kerei led tribes that had left", "options": ["the Nogai Horde", "the White Horde", "the Khanate of Abulkhair", "Moghulistan", "Transoxiana"], "correct": 2}, {"q": "Which source contains information about the founding of the Kazakh Khanate", "options": ["\"Kutadgu Bilig\"", "Muhammad Haidar Dulati's \"Tarikh-i Rashidi\"", "\"Diwan Lughat al-Turk\"", "\"Diwan-i Hikmet\"", "the treatises of al-Farabi"], "correct": 1}, {"q": "A work by Muhammad Haidar Dulati", "options": ["\"A Thousand of Alash\"", "\"Shaybani-nama\"", "\"Tarikh-i Rashidi\"", "\"Tarikh-i Abu'l-Khayri\"", "\"Baburnama\""], "correct": 2}, {"q": "Supreme power in the Kazakh Khanate belonged to the", "options": ["yabgu", "gunmo", "khuntaishi", "khagan", "khan"], "correct": 4}, {"q": "The khan was elected by the sultans from among the", "options": ["aulbasy (village elders)", "rubasy", "aksakals", "sultans", "biys"], "correct": 3}, {"q": "The rulers of uluses in the Kazakh Khanate in the 15th-17th centuries were the", "options": ["khans", "sharua (commoners)", "kuls (slaves)", "khojas", "sultans"], "correct": 4}, {"q": "The ethnic consolidation of a unified Kazakh people took place under Khan", "options": ["Esim", "Kerei", "Kasym", "Tauekel", "Tauke"], "correct": 2}, {"q": "Contemporaries estimated the number of Kasym Khan's subjects at", "options": ["two million", "half a million", "three hundred thousand", "one million people", "one and a half million"], "correct": 3}, {"q": "Between 1538 and 1580, the restoration of the Kazakh Khanate's territory was undertaken by Kasym's son", "options": ["Esim", "Khak-Nazar", "Ablai", "Tauke", "Zhanibek"], "correct": 1}, {"q": "Khak-Nazar was killed by the people of", "options": ["the Nogai mirzas", "Khan Kuchum", "the Oirats", "the Khivans", "Baba Sultan"], "correct": 4}, {"q": "From 1582 to 1598, the ruler was", "options": ["Tauekel", "Ablai", "Zhanibek", "Esim", "Tauke"], "correct": 0}, {"q": "In 1598, Tauekel captured a number of cities, including", "options": ["Samarkand", "Bukhara", "Kashgar", "Uzgend", "Sygnak"], "correct": 0}, {"q": "From 1598 to 1628, the Kazakh Khanate was ruled by", "options": ["Ablai", "Abulkhair", "Khak-Nazar", "Esim", "Tauke"], "correct": 3}, {"q": "The legal code \"Zhety Zhargy\" was created under", "options": ["Tauke", "Kasym", "Khak-Nazar", "Tauekel", "Ablai"], "correct": 0}, {"q": "One of the creators of \"Zhety Zhargy,\" the famous biy of the Junior Zhuz", "options": ["Maily Biy", "Tole Biy", "Kazybek Biy", "Aiteke Biy", "Niyaz Biy"], "correct": 3}, {"q": "A lawgiver biy, representative of the Middle Zhuz", "options": ["Tole Biy", "Yeset Biy", "Aiteke Biy", "Aktailak Biy", "Kazybek Biy"], "correct": 4}, {"q": "Khan Tauke, to fight the Dzungars, formed a military alliance with", "options": ["the Kyrgyz and Karakalpaks", "the Khivans and Uzbeks", "the Bukharans", "the Chinese", "the Kalmyks"], "correct": 0}, {"q": "The work \"Shezhire-i Turki\" was written in the 17th century by", "options": ["Kadyrgali Zhalayiri", "Muhammad Haidar Dulati", "Shah Mahmud Churas", "Abu'l-Ghazi Bahadur", "Usman Kuhistani"], "correct": 3}, {"q": "A work by Kadyrgali Zhalayiri", "options": ["\"Tarikh-i Rashidi\"", "\"Diwan-i Hikmet\"", "\"Kutadgu Bilig\"", "\"Diwan Lughat al-Turk\"", "\"Jami al-Tawarikh\""], "correct": 4}, {"q": "Famous Kazakh zhyrau (bards) of the 16th-17th centuries", "options": ["Tatikara, Suyunbai", "Shernyaz, Akan Sere", "Orynbai, Zhaiau Musa", "Makhambet, Dulat", "Dospambet, Zhiyembet"], "correct": 4}], [{"q": "The first kurultai of the three zhuzes to organize resistance against the Dzungars took place at the headquarters of Khan Tauke in", "options": ["1705", "1710", "1715", "1720", "1725"], "correct": 1}, {"q": "The Battle of Anrakai between the Dzungars and the Kazakh militia took place in", "options": ["1727", "1729", "1728", "1731", "1724"], "correct": 1}, {"q": "Overall command of the combined forces of the three zhuzes at the Ordabasy kurultai was given to", "options": ["Khan Semeke", "Khan Kaiyp", "Khan Abulmambet", "Khan Abulkhair", "Khan Zholbarys"], "correct": 3}, {"q": "The joining of the Junior Zhuz to Russia was begun by Khan", "options": ["Abulkhair", "Semeke", "Kaiyp", "Abulmambet", "Kenesary"], "correct": 0}, {"q": "The decree accepting the Junior Zhuz into Russia was signed in", "options": ["1713", "1723", "1729", "1731", "1738"], "correct": 3}, {"q": "The embassy sent to have the charter of Russian subjecthood signed was led by", "options": ["Chebukov", "Stepanov", "Tevkelev", "Demidov", "Menshikov"], "correct": 2}, {"q": "In 1734, a special commission was formed, called the", "options": ["Kazakh Commission", "Steppe Commission", "Scientific Commission", "Kirghiz-Kaisak Commission", "Kazakh-Kaisak Commission"], "correct": 3}, {"q": "The Orenburg expedition (the 1734 commission) was headed by", "options": ["P. K. Essen", "M. M. Speransky", "I. K. Kirillov", "A. Tevkelev", "I. I. Neplyuev"], "correct": 2}, {"q": "How many times did Khan Abulkhair take the oath of allegiance to Russia", "options": ["2", "1", "5", "4", "3"], "correct": 4}, {"q": "In 1748, Khan Abulkhair was killed by Sultan", "options": ["Karatai", "Niyaz", "Ablai", "Barak", "Zhantore"], "correct": 3}, {"q": "The organizer of the resistance against the Chinese troops that invaded the territory of Kazakhstan in 1756 was", "options": ["Nauryzbai Batyr", "Sultan Ablai", "Khan Abulkhair", "Kabanbai Batyr", "Sultan Uali"], "correct": 1}, {"q": "In what year did Sultan Ablai accept Chinese subjecthood while retaining Russian subjecthood", "options": ["1754", "1753", "1755", "1752", "1756"], "correct": 4}, {"q": "A major influence on Khan Ablai was", "options": ["Tatikara", "Umbetei", "Bukhar-zhyrau", "Asan-Kaigy", "Dospambet-zhyrau"], "correct": 2}, {"q": "The battle of the Kazakh militia against the Dzungars in the Ayaguz River valley took place in", "options": ["1714", "1715", "1718", "1711", "1717"], "correct": 2}], [{"q": "Under the 1822 \"Charter,\" nearly unlimited powers were acquired by the", "options": ["governor-general", "volost sultan", "frontier chief (border commandant)", "chairman of the administration", "khan"], "correct": 2}, {"q": "The 1822 \"Charter on the Siberian Kirghiz\" began the liquidation of khan's power in the", "options": ["Senior Zhuz", "Junior Zhuz", "Middle Zhuz", "the Bukey Horde", "the entire territory"], "correct": 2}, {"q": "In 1824, khan's power was abolished in the", "options": ["Bukey Horde", "Senior Zhuz", "Middle Zhuz", "Junior Zhuz", "everywhere simultaneously"], "correct": 3}, {"q": "According to the \"Charter on the Siberian Kirghiz,\" court cases were divided into three categories", "options": ["civil, military", "burgher, noble, merchant", "criminal, civil-claim, and complaints against the administration", "criminal and parity", "supervised"], "correct": 2}, {"q": "The leader of the 1836-1838 uprising in the Bukey Horde", "options": ["Yeset Kotibarov", "Isatai Taimanov", "Kenesary Kasymov", "Syrym Datuly", "Sarzhan Kasymov"], "correct": 1}, {"q": "The ideological inspiration and akyn (bard) of the 1836-1838 uprising in the Inner (Bukey) Horde", "options": ["Sart Edyluly", "Zhanbolat", "Nauryzbaiuly", "Duisenuly", "Makhambet Utemisuly"], "correct": 4}, {"q": "Isatai Taimanov was defeated and killed at", "options": ["Maitobe", "Akbulak", "Zhideli", "Terekti-Kum", "Tastobe"], "correct": 1}, {"q": "The leader of the largest national liberation uprising of the Kazakhs in the 19th century", "options": ["Zhankozha Nurmukhameduly", "Kenesary Kasymuly", "Zholaman Tilenshiuly", "Isatai Taimanuly", "Yeset Kotibaruly"], "correct": 1}, {"q": "Which leader of the 19th-century national liberation movements died at Kekilik-Sengir", "options": ["M. Utemisov", "I. Taimanov", "Aryngazy", "K. Kasymov", "S. Kasymov"], "correct": 3}, {"q": "What event triggered Sarzhan Kasymov's uprising", "options": ["the abolition of khan's power", "the opening of the Karkaralinsk district office", "the increase of troops", "the seizure of land", "the imposition of Orthodoxy"], "correct": 1}, {"q": "Which battle was decisive in freeing Semirechye from the Kokand yoke", "options": ["at Aulie-Ata", "at Shymkent", "at Uzunagash", "at Bukhara", "against the Khivan khan"], "correct": 2}, {"q": "Under the 1867-1868 reform, the entire territory of Kazakhstan was divided into", "options": ["2 governor-generalships", "4", "3 governor-generalships", "autonomous regions", "districts"], "correct": 2}, {"q": "The lowest tier of the judicial system under the 1867-1868 reform was", "options": ["the military court", "the court of biys and qadis", "the regional court", "the district court", "the county court"], "correct": 1}, {"q": "In what year did I. Altynsarin open the first Kazakh school", "options": ["1834", "1854", "1864", "1884", "1914"], "correct": 2}, {"q": "Sh. Ualikhanov gained worldwide fame for", "options": ["his research on the \"Manas\" epic", "his research on Issyk-Kul", "ethnographic works", "works on the Alatau Kirghiz", "his account of his journey to Kashgaria"], "correct": 4}, {"q": "The name given to Abai Kunanbaiuly at birth", "options": ["Abai", "Akylbai", "Ibrahim", "Kunanbai", "Akhmet Riza"], "correct": 2}, {"q": "Mass resettlement of Russian peasants to Kazakhstan reached its peak during", "options": ["the early 19th century", "the 1860s", "the early 20th century", "the Stolypin reform", "the 18th century"], "correct": 3}, {"q": "According to the 1891 \"Regulation,\" the center of the Steppe Governor-Generalship was", "options": ["Uralsk", "Akmolinsk", "Semipalatinsk", "Orenburg", "Omsk"], "correct": 4}], [{"q": "The pretext for the 1916 uprising was", "options": ["the start of World War I", "resettlement policy", "the requisition of yurts", "the first Russian revolution", "the conscription of Kazakh men for rear (labor) service"], "correct": 4}, {"q": "By its character, the 1916 uprising was", "options": ["bourgeois", "reactionary", "socialist", "anti-feudal", "a national liberation movement"], "correct": 4}, {"q": "One of the major centers of the 1916 movement was", "options": ["Semirechye", "Northern Kazakhstan", "Mangystau", "the Volga region", "Eastern Kazakhstan"], "correct": 0}, {"q": "The leader of the insurgent detachments of 1916 in Turgai", "options": ["Uralsk", "Amangeldy Imanov (Turgai)", "Akmolinsk", "Semirechye", "Semipalatinsk"], "correct": 1}, {"q": "The leader of the 1916 uprising in Semirechye", "options": ["Saken Seifullin", "Amangeldy Imanov", "A. Dzhanbosynov", "Tokash Bokin", "Alibi Dzhangildin"], "correct": 3}, {"q": "The printed organ of the \"Alash\" organization", "options": ["\"Aikap\"", "\"Turkestansky Kuryer\"", "\"Semipalatinsky Listok\"", "\"Stepnoi Krai\"", "\"Kazakh\""], "correct": 4}, {"q": "The question of forming the \"Alash\" party was considered by the All-Kazakh Congress in Orenburg in", "options": ["December 1900", "January 1905", "July 1917", "February 1918", "March 1920"], "correct": 2}, {"q": "According to the program of the \"Alash\" party, the Kazakh regions were to", "options": ["be consolidated", "receive regional territorial-national autonomy", "receive full sovereignty", "be reorganized", "remain subordinate to the center"], "correct": 1}, {"q": "In November 1917, the 4th Extraordinary All-Turkestan Congress formed the", "options": ["Kirghiz Republic", "Turkestan (Kokand) Autonomy", "Bukhara Republic", "Alash Orda", "Republic of Kazakhstan"], "correct": 1}, {"q": "By its character, the February Revolution of 1917 was", "options": ["national-liberation", "reactionary-monarchist", "socialist", "anti-feudal", "bourgeois-democratic"], "correct": 4}], [{"q": "The decree \"On the Formation of the Autonomous Kirghiz (Kazakh) SSR\" was issued on", "options": ["August 26, 1920", "July 26, 1920", "May 26, 1920", "June 26, 1920", "September 26, 1920"], "correct": 0}, {"q": "The first capital of the Kazakh ASSR", "options": ["Uralsk", "Tashkent", "Kyzylorda", "Orenburg", "Verny"], "correct": 3}, {"q": "In the summer of 1919, the 25th Division, under the command of V. Chapaev, took part in", "options": ["the liberation of Uralsk", "the liberation of Orenburg", "the defense of Tashkent", "the Kronstadt rebellion", "the liberation of Semipalatinsk"], "correct": 0}, {"q": "In March 1921, the 10th Party Congress decided to replace the prodrazvyorstka (grain requisitioning) with", "options": ["a differentiated tax", "commodity exchange", "a monetary tax", "state farms", "a tax in kind (prodnalog)"], "correct": 4}, {"q": "On the eve of industrialization, the Kazakh economy was dominated by", "options": ["light industry", "machine-tool building", "the chemical industry", "agriculture", "automobile manufacturing"], "correct": 3}, {"q": "During industrialization, a railway was built called the", "options": ["Orenburg-Tashkent", "Moyinty-Chu", "Trans-Siberian", "Ural Railway", "Turksib"], "correct": 4}, {"q": "One of the features of industrialization in Kazakhstan was", "options": ["the development of machine building", "faster growth of the energy sector", "the creation of an aviation industry", "a predominance of Kazakhs in the working class", "the predominant development of extractive industry"], "correct": 4}, {"q": "The northern and southern sections of the Turksib were joined on April 28, 1930, at the station of", "options": ["Chu", "Matai", "Ushtobe", "Ainabulak", "Taraz"], "correct": 3}, {"q": "The decree \"On the Confiscation of Bai Households\" was adopted on the eve of", "options": ["the Civil War", "the NEP", "the October Revolution", "the collectivization of agriculture", "the Great Patriotic War"], "correct": 3}, {"q": "Public figures who spoke out against the \"Little October\" policy", "options": ["I. Kuramysov and M. Kurnakov", "M. Gubkin and T. Kozybekov", "M. Nurmakov and D. Omarov", "T. Ryskulov and A. Andreyev", "S. Sadvakasov and Zh. Mynbayev"], "correct": 4}, {"q": "By October 1931, about ____ of households in Kazakhstan had been collectivized", "options": ["75%", "35%", "65%", "45%", "55%"], "correct": 2}, {"q": "The years of mass repression", "options": ["1931-1933", "1934-1936", "1939-1940", "1928-1931", "1937-1938"], "correct": 4}, {"q": "Doctor of Sciences Ye. Bekmakhanov was subjected to repression for his objective assessment of", "options": ["socio-economic development", "the development of culture", "the 1905 revolution", "external relations", "the anti-colonial uprisings of the Kazakh people"], "correct": 4}], [{"q": "The 316th Rifle Division was commanded by Major General", "options": ["B. Momyshuly", "I. V. Panfilov", "V. G. Klochkov", "A. Moldagulova", "T. Tokhtarov"], "correct": 1}, {"q": "The company political officer of the 316th Division who said \"Russia is great, but there is nowhere to retreat, Moscow is behind us\"", "options": ["A. S. Yegorov", "I. V. Karpov", "T. Tokhtarov", "I. V. Panfilov", "V. G. Klochkov"], "correct": 4}, {"q": "A Kazakh writer, participant in the Battle of Moscow, battalion commander", "options": ["B. Momyshuly", "G. Musrepov", "S. Mukanov", "M. Auezov", "A. Abishev"], "correct": 0}, {"q": "The number of Kazakhstanis mobilized into the Red Army during the war", "options": ["220,000", "1.2 million", "400,000", "445,000", "1.9 million"], "correct": 1}, {"q": "Twice Hero of the Soviet Union, ground-attack pilot who flew 305 combat sorties", "options": ["R. Amangeldiyev", "T. Tokhtarov", "T. Bigeldinov", "B. Momyshuly", "S. Baimagambetov"], "correct": 2}, {"q": "The military specialty of Hero of the Soviet Union Aliya Moldagulova", "options": ["radio operator", "interpreter", "sniper", "pilot", "machine-gunner"], "correct": 2}, {"q": "The Kazakh who threw himself onto a pillbox's embrasure while defending Leningrad", "options": ["R. Amangeldiyev", "T. Tokhtarov", "T. Bigeldinov", "B. Momyshuly", "S. Baimagambetov"], "correct": 4}, {"q": "A labor hero who achieved a record millet harvest during the war years", "options": ["B. Momyshuly", "Sh. Bersiyev", "Zh. Kuanyshpayev", "I. Zhakayev", "A. Stakhanov"], "correct": 1}, {"q": "The Central Combined Feature Film Studio was established during the war years in", "options": ["Guryev", "Uralsk", "Semipalatinsk", "Pavlodar", "Alma-Ata"], "correct": 4}], [{"q": "In 1949, the laureate of the USSR State Prize was", "options": ["G. Mustafin", "S. Mukanov", "Ye. Bekmakhanov", "M. Auezov", "G. Musrepov"], "correct": 3}, {"q": "In 1957, the sovnarkhoz (regional economic council) system was organized on the", "options": ["international principle", "territorial principle", "national principle", "sectoral principle", "party principle"], "correct": 1}, {"q": "In 1965, the first oil was produced at the ______ field", "options": ["Karachaganak", "Uzen", "Tengiz", "Munaily", "Sunkar"], "correct": 1}, {"q": "The demonstration by Kazakh youth on June 16, 1979, against the creation of a German autonomous region took place in the city of", "options": ["Karaganda", "Petropavlovsk", "Pavlodar", "Tselinograd", "Kokshetau"], "correct": 3}, {"q": "The main cause of the December 1986 events (Zheltoksan) was", "options": ["the economic crisis", "the appointment of G. Kolbin, instead of D. Kunayev, as First Secretary of the Kazakh Communist Party", "the closing of universities", "land reform", "language policy"], "correct": 1}, {"q": "The July 1987 CPSU Central Committee Plenum assessed the December 1986 events as a manifestation of", "options": ["a demonstration of solidarity", "a national liberation movement", "free expression of will", "\"Kazakh nationalism\"", "a democratic youth movement"], "correct": 3}, {"q": "In the late 1980s, the creative legacy of ______ was rehabilitated", "options": ["M. Zhumabayev", "S. Mukanov", "B. Mailin", "S. Seifullin", "M. Auezov"], "correct": 0}], [{"q": "The Law \"On the State Independence of the Republic of Kazakhstan\" was adopted on", "options": ["October 25, 1990", "December 1, 1991", "December 16, 1991", "December 21, 1991", "August 30, 1995"], "correct": 2}, {"q": "The decision to rename the Kazakh SSR as the Republic of Kazakhstan was made on", "options": ["March 2, 1992", "December 16, 1993", "December 10, 1991", "October 30, 1990", "December 1, 1991"], "correct": 2}, {"q": "The first nationwide presidential election, in which N. Nazarbayev was elected, took place on", "options": ["December 16, 1991", "December 1, 1991", "October 25, 1990", "April 29, 1995", "March 2, 1992"], "correct": 1}, {"q": "Kazakhstan joined the CIS (Alma-Ata Declaration) on", "options": ["December 16, 1991", "December 21, 1991", "December 8, 1991", "March 2, 1992", "May 15, 1992"], "correct": 1}, {"q": "Kazakhstan became a full member of the UN on", "options": ["December 16, 1991", "March 2, 1992", "June 4, 1992", "October 5, 1992", "June 15, 1992"], "correct": 1}, {"q": "The State Flag and Emblem of independent Kazakhstan were adopted on", "options": ["1991", "June 4, 1992", "1993", "1995", "1997"], "correct": 1}, {"q": "The author of the State Flag of the Republic of Kazakhstan", "options": ["Zhandarbek Malibekov", "Shot-Aman Ualikhanov", "Shaken Niyazbekov", "Shamshi Kaldayakov", "Zhumeken Nazhimedenov"], "correct": 2}, {"q": "The First World Kurultai of Kazakhs (1992) took place in", "options": ["Astana", "Turkistan", "Almaty", "Shymkent", "Karaganda"], "correct": 2}, {"q": "The first Constitution of independent Kazakhstan was adopted on", "options": ["December 16, 1991", "January 28, 1993", "August 30, 1995", "March 1, 1995", "October 25, 1990"], "correct": 1}, {"q": "The national currency, the tenge, was put into circulation on", "options": ["November 12, 1993", "November 15, 1993", "November 18, 1993", "November 15, 1992", "January 1, 1994"], "correct": 1}, {"q": "The Assembly of the People of Kazakhstan was established on", "options": ["December 16, 1991", "March 1, 1995", "August 30, 1995", "March 1, 1992", "April 29, 1995"], "correct": 1}, {"q": "The second (current) Constitution was adopted by national referendum on", "options": ["January 28, 1993", "December 16, 1991", "August 30, 1995", "March 1, 1995", "April 29, 1995"], "correct": 2}, {"q": "Under the original 1995 Constitution, the President was elected for a term of", "options": ["4 years", "5 years", "6 years", "7 years", "10 years"], "correct": 3}, {"q": "Under UNESCO's auspices, the Year of Abai was declared in", "options": ["1994", "1995", "2000", "1990", "1945"], "correct": 1}, {"q": "The party of which O. Suleimenov and M. Shakhanov became co-chairs in 1991", "options": ["Alash", "the Social Democratic Party", "Zheltoksan", "Azat", "the People's Congress of Kazakhstan"], "correct": 4}, {"q": "The city of Akmola was officially declared the capital of the Republic of Kazakhstan in", "options": ["1995", "1996", "1997", "1998", "1994"], "correct": 2}, {"q": "The city of Akmola was renamed Astana on", "options": ["December 10, 1997", "May 6, 1998", "June 10, 1998", "October 20, 1997", "July 6, 1996"], "correct": 1}, {"q": "The \"Kazakhstan-2030\" development strategy was announced in the President's Address in", "options": ["1995", "1998", "1997", "2000", "2012"], "correct": 2}, {"q": "The national currency of the Republic of Kazakhstan is the", "options": ["som", "manat", "tenge", "ruble", "sum"], "correct": 2}, {"q": "The capital of the Republic of Kazakhstan since 1997", "options": ["Almaty", "Astana", "Karaganda", "Shymkent", "Turkistan"], "correct": 1}, {"q": "Independence Day in the Republic of Kazakhstan is celebrated on", "options": ["October 25", "December 1", "December 16", "August 30", "March 2"], "correct": 2}, {"q": "The Semipalatinsk Nuclear Test Site was closed by presidential decree on", "options": ["December 16, 1991", "August 29, 1991", "August 29, 1949", "October 25, 1990", "December 1, 1991"], "correct": 1}, {"q": "The EXPO-2017 international exhibition in Astana was held under the theme", "options": ["\"Green Economy\"", "\"Future Energy\"", "\"Sustainable Development\"", "\"Water is the Source of Life\"", "\"Smart City\""], "correct": 1}, {"q": "The Treaty on the Eurasian Economic Union (EAEU) was signed in Astana on", "options": ["January 1, 2015", "2014 in Minsk", "May 29, 2014", "December 21, 1991", "May 15, 1992"], "correct": 2}, {"q": "The \"Kazakhstan-2050\" strategy was presented in the President's Address in", "options": ["1997", "2007", "2010", "2012", "2015"], "correct": 3}, {"q": "In 2019, following N. Nazarbayev's resignation, the President of Kazakhstan became", "options": ["Nursultan Nazarbayev", "Kassym-Jomart Tokayev", "Dariga Nazarbayeva", "Yerlan Koshanov", "Askar Mamin"], "correct": 1}]];
-// Keep the review cards and their question banks in historical order.
-// The Silk Road begins earlier than the Turkic and medieval states, although it continued alongside them.
+// Put the legacy period-based banks in historical order (the Silk Road comes before the
+// Turkic and medieval states). The week-based syllabus structure is built from this order.
 const CHRONOLOGY_ORDER = [0, 1, 4, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-const orderedTopics = CHRONOLOGY_ORDER.map(function(i){ return TOPICS[i]; });
 const orderedQuestionBank = CHRONOLOGY_ORDER.map(function(i){ return QUESTION_BANK[i]; });
-TOPICS.splice.apply(TOPICS, [0, TOPICS.length].concat(orderedTopics));
 QUESTION_BANK.splice.apply(QUESTION_BANK, [0, QUESTION_BANK.length].concat(orderedQuestionBank));
-
-// Clarify the chronology shown beneath each topic title.
-const CHRONOLOGY_LABELS = [
-  ["Stone Age", "Paleolithic – Eneolithic · earliest period"],
-  ["Bronze Age & Early Nomads", "2nd millennium BCE – 5th c. CE"],
-  ["The Great Silk Road", "2nd c. BCE – 15th c. CE"],
-  ["Turkic Khaganates", "6th–9th c."],
-  ["Karakhanids & Kipchaks", "9th–13th c."],
-  ["Mongol Era & Golden Horde", "13th–15th c."],
-  ["The Kazakh Khanate", "15th–17th c."],
-  ["Dzungar Wars", "17th–18th c."],
-  ["Kazakhstan in the Russian Empire", "18th–19th c."],
-  ["1916 Revolt & Alash", "1916–1920"],
-  ["Early Soviet Kazakhstan", "1920–1940"],
-  ["World War II", "1941–1945"],
-  ["Postwar Era & Zheltoksan", "1945–1991"],
-  ["Independent Kazakhstan", "1991–present"]
-];
-TOPICS.forEach(function(topic, i){
-  topic.name = CHRONOLOGY_LABELS[i][0];
-  topic.era = CHRONOLOGY_LABELS[i][1];
-});
 
 // Correct a legacy answer key before the expanded exam bank is used.
 QUESTION_BANK[1].forEach(function(item){
@@ -584,7 +565,6 @@ const ADDITIONAL_STONE_AGE_QUESTIONS = [
 ];
 
 QUESTION_BANK[0].push.apply(QUESTION_BANK[0], ADDITIONAL_STONE_AGE_QUESTIONS);
-TOPICS[0].count = QUESTION_BANK[0].length;
 
 // Official exam-preparation questions supplied for Units 2 and 3.
 // Obvious machine-translation errors in names and place names have been corrected.
@@ -706,7 +686,6 @@ function appendUniqueQuestions(topicIndex, additions){
     const key = item.q.trim().toLowerCase();
     if (!existing.has(key)){ QUESTION_BANK[topicIndex].push(item); existing.add(key); }
   });
-  TOPICS[topicIndex].count = QUESTION_BANK[topicIndex].length;
 }
 appendUniqueQuestions(1, EARLY_IRON_AGE_EXAM_QUESTIONS);
 appendUniqueQuestions(3, TURKIC_ERA_EXAM_QUESTIONS);
@@ -845,7 +824,7 @@ function takeBalancedQuestions(lists, limit){
 }
 
 syllabusQuestionBank[7] = takeBalancedQuestions(syllabusQuestionBank.slice(0, 7), 30);
-syllabusTopics.forEach(function(topic){ topic.count = 30; });
+syllabusTopics.forEach(function(topic, index){ topic.count = syllabusQuestionBank[index].length; });
 TOPICS.splice(0, TOPICS.length);
 Array.prototype.push.apply(TOPICS, syllabusTopics);
 QUESTION_BANK.splice(0, QUESTION_BANK.length);
@@ -858,6 +837,39 @@ const topicStats = TOPICS.map(function(){ return {attempted:false, correct:0, to
 let overallStats = {testsCompleted:0, bestScore:null};
 const flashTopicStats = TOPICS.map(function(){ return {attempted:false, correct:0, total:0}; });
 let flashOverall = {reviewed:0, known:0};
+
+// ---------- saved progress (localStorage) ----------
+const STORAGE_KEY = 'kz-history-trainer-v5';
+function readSaved(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) { return {}; }
+}
+function writeSaved(patch){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.assign(readSaved(), patch))); } catch (e) { /* storage unavailable */ }
+}
+function restoreStats(target, saved){
+  if (!Array.isArray(saved) || saved.length !== target.length) return;
+  saved.forEach(function(item, i){
+    if (item && item.attempted && item.total > 0 && item.correct >= 0 && item.correct <= item.total){
+      target[i].attempted = true; target[i].correct = item.correct; target[i].total = item.total;
+    }
+  });
+}
+function saveProgress(){
+  writeSaved({topicStats:topicStats, overallStats:overallStats, flashTopicStats:flashTopicStats, flashOverall:flashOverall});
+}
+(function restoreProgress(){
+  const saved = readSaved();
+  restoreStats(topicStats, saved.topicStats);
+  restoreStats(flashTopicStats, saved.flashTopicStats);
+  if (saved.overallStats && saved.overallStats.testsCompleted > 0){
+    overallStats.testsCompleted = saved.overallStats.testsCompleted;
+    overallStats.bestScore = saved.overallStats.bestScore;
+  }
+  if (saved.flashOverall && saved.flashOverall.reviewed > 0){
+    flashOverall.reviewed = saved.flashOverall.reviewed;
+    flashOverall.known = saved.flashOverall.known;
+  }
+})();
 
 function shuffle(arr){
   const a = arr.slice();
@@ -929,7 +941,7 @@ function buildTopicCardEl(t, i, stats){
   el.innerHTML =
     '<div class="topic-top"><p class="topic-name">'+t.name+'</p><span class="topic-score '+scoreClass+'">'+scoreText+'</span></div>'+
     '<p class="topic-era">'+t.era+'</p>'+
-    '<p class="topic-count">'+(t.reviewWeeks ? '30-question balanced review' : t.count+' practice question'+(t.count===1?'':'s'))+'</p>';
+    '<p class="topic-count">'+(t.reviewWeeks ? Math.min(t.count, QUESTIONS_PER_QUIZ)+'-question balanced review' : t.count+' practice question'+(t.count===1?'':'s'))+'</p>';
   return el;
 }
 function renderTopicGrid(container, stats, onClick){
@@ -946,6 +958,15 @@ function renderDashboard(){
   document.getElementById('stat-tests').textContent = overallStats.testsCompleted;
   renderTopicGrid(grid, topicStats, function(i){ generateQuiz(i); goto('quiz'); renderQuizQuestion(); });
 }
+
+document.getElementById('reset-progress-btn').addEventListener('click', function(){
+  if (!confirm('Erase your saved scores and flashcard statistics on this device?')) return;
+  [topicStats, flashTopicStats].forEach(function(list){ list.forEach(function(st){ st.attempted = false; st.correct = 0; st.total = 0; }); });
+  overallStats.testsCompleted = 0; overallStats.bestScore = null;
+  flashOverall.reviewed = 0; flashOverall.known = 0;
+  saveProgress();
+  renderDashboard(); renderFlashcardsIntro();
+});
 
 // ---------- quiz ----------
 let quiz = null;
@@ -1055,6 +1076,7 @@ function finishQuiz(){
   overallStats.testsCompleted++;
   const pct = Math.round((quiz.correct/quiz.items.length)*100);
   if (overallStats.bestScore === null || pct > overallStats.bestScore) overallStats.bestScore = pct;
+  saveProgress();
   document.getElementById('quiz-active').style.display = 'none';
   document.getElementById('quiz-done').style.display = '';
   const tier = performanceTier(pct);
@@ -1133,6 +1155,7 @@ function rateCard(knew){
     if (knew) st.correct++;
   }
   if (knew) fc.known++;
+  saveProgress();
   fc.index++;
   if (fc.index >= fc.items.length){ finishFlashcards(); return; }
   renderFlashcard();
@@ -1184,6 +1207,11 @@ const ESSAY_TOPICS = [
 const ESSAY_TIME = 20 * 60;
 let essayTimeLeft = ESSAY_TIME, essayTimerId = null, essaySubmitted = false;
 let pasteAttempts = 0, tabSwitches = 0, keystrokes = 0;
+// typedCharacters counts text that arrived in small steps; bulkInsertions counts sudden jumps
+// (autofill, dictation, injected text) that do not look like typing.
+let typedCharacters = 0, bulkInsertions = 0, lastEssayLength = 0;
+const BULK_INSERT_CHARS = 25;
+const BLOCKED_INPUT_TYPES = ['insertFromPaste', 'insertFromPasteAsQuotation', 'insertFromDrop', 'insertFromYank'];
 
 const stages = ['outline', 'draft', 'review', 'submitted'];
 let stageIndex = 0;
@@ -1241,10 +1269,42 @@ function resetEssayPractice(restartTimer){
   document.getElementById('ai-status').className = 'ai-status';
   document.getElementById('ai-status').textContent = 'Submit an essay to start the automatic review.';
   pasteAttempts = 0; tabSwitches = 0; keystrokes = 0; stageIndex = 0;
+  typedCharacters = 0; bulkInsertions = 0; lastEssayLength = 0;
+  clearEssayDraft();
   updateIntegrityChips(); renderStages();
   if (restartTimer || essayStarted) startEssayTimer();
 }
-setEssayTopic(2);
+const ESSAY_DRAFT_KEY = 'kz-history-trainer-essay-draft';
+function saveEssayDraft(){
+  try {
+    localStorage.setItem(ESSAY_DRAFT_KEY, JSON.stringify({
+      topic:Number(essayTopicSelect.value), text:essayText.value, keystrokes:keystrokes,
+      typedCharacters:typedCharacters, bulkInsertions:bulkInsertions, pasteAttempts:pasteAttempts, tabSwitches:tabSwitches
+    }));
+    return true;
+  } catch (e) { return false; }
+}
+function clearEssayDraft(){
+  try { localStorage.removeItem(ESSAY_DRAFT_KEY); } catch (e) { /* storage unavailable */ }
+}
+(function restoreEssayDraft(){
+  let draft = null;
+  try { draft = JSON.parse(localStorage.getItem(ESSAY_DRAFT_KEY)); } catch (e) { /* no saved draft */ }
+  const valid = draft && Number.isInteger(draft.topic) && draft.topic >= 0 && draft.topic < ESSAY_TOPICS.length &&
+    typeof draft.text === 'string' && draft.text.trim().length > 0;
+  if (!valid){ setEssayTopic(2); return; }
+  setEssayTopic(draft.topic);
+  essayText.value = draft.text;
+  lastEssayLength = draft.text.length;
+  keystrokes = Number(draft.keystrokes) || 0;
+  typedCharacters = Number(draft.typedCharacters) || 0;
+  bulkInsertions = Number(draft.bulkInsertions) || 0;
+  pasteAttempts = Number(draft.pasteAttempts) || 0;
+  tabSwitches = Number(draft.tabSwitches) || 0;
+  const words = draft.text.trim().split(/\s+/).length;
+  document.getElementById('word-count').textContent = words + ' word' + (words === 1 ? '' : 's');
+  document.getElementById('autosave').textContent = 'Draft restored';
+})();
 essayTopicSelect.addEventListener('change', function(){
   setEssayTopic(Number(essayTopicSelect.value));
   resetEssayPractice(true);
@@ -1256,16 +1316,24 @@ document.getElementById('essay-random').addEventListener('click', function(){
   resetEssayPractice(true);
 });
 document.getElementById('essay-reset').addEventListener('click', function(){ resetEssayPractice(true); });
-essayText.addEventListener('paste', function(e){ e.preventDefault(); pasteAttempts++; showPasteWarning(); updateIntegrityChips(); });
-essayText.addEventListener('drop', function(e){ e.preventDefault(); pasteAttempts++; showPasteWarning(); updateIntegrityChips(); });
+function blockInsertedText(e){ e.preventDefault(); pasteAttempts++; showPasteWarning(); updateIntegrityChips(); }
+essayText.addEventListener('paste', blockInsertedText);
+essayText.addEventListener('drop', blockInsertedText);
+essayText.addEventListener('beforeinput', function(e){
+  if (BLOCKED_INPUT_TYPES.indexOf(e.inputType) !== -1) blockInsertedText(e);
+});
 essayText.addEventListener('keydown', function(){ keystrokes++; });
-essayText.addEventListener('input', function(){
+essayText.addEventListener('input', function(e){
+  const delta = essayText.value.length - lastEssayLength;
+  lastEssayLength = essayText.value.length;
+  if (delta > BULK_INSERT_CHARS && !e.isComposing){ bulkInsertions++; }
+  else if (delta > 0){ typedCharacters += delta; }
   const words = essayText.value.trim().length ? essayText.value.trim().split(/\s+/).length : 0;
   document.getElementById('word-count').textContent = words + ' word' + (words===1?'':'s');
   const now = new Date();
   const hh = String(now.getHours()).padStart(2,'0');
   const mm = String(now.getMinutes()).padStart(2,'0');
-  document.getElementById('autosave').textContent = 'Saved · ' + hh + ':' + mm;
+  document.getElementById('autosave').textContent = (saveEssayDraft() ? 'Saved · ' : 'Not saved · ') + hh + ':' + mm;
 });
 
 function showPasteWarning(){
@@ -1308,6 +1376,30 @@ function updateEssayTimer(){
   el.classList.toggle('warn', essayTimeLeft <= 120);
 }
 
+function readAccessCode(){
+  try { return sessionStorage.getItem('kz-history-trainer-access-code') || ''; } catch (e) { return ''; }
+}
+function storeAccessCode(code){
+  try { sessionStorage.setItem('kz-history-trainer-access-code', code); } catch (e) { /* storage unavailable */ }
+}
+async function requestReview(endpoint, body){
+  for (let attempt = 0; attempt < 2; attempt++){
+    const headers = {'Content-Type':'application/json'};
+    const code = readAccessCode();
+    if (code) headers['X-Access-Code'] = code;
+    const response = await fetch(endpoint, {method:'POST', headers:headers, body:body});
+    const data = await response.json().catch(function(){ return {}; });
+    if (response.status === 401 && attempt === 0){
+      const entered = window.prompt('This AI review needs an access code from your teacher:');
+      if (!entered) throw new Error('An access code is required for AI review.');
+      storeAccessCode(entered.trim());
+      continue;
+    }
+    if (!response.ok) throw new Error(data.error || 'The AI review service returned an error.');
+    return data;
+  }
+  throw new Error('The access code was not accepted.');
+}
 async function runAiReview(){
   const textValue = essayText.value.trim();
   const status = document.getElementById('ai-status');
@@ -1318,41 +1410,36 @@ async function runAiReview(){
     status.textContent = 'Write at least 30 words before requesting an AI review.';
     return;
   }
-  status.className = 'ai-status loading';
-  status.textContent = 'OpenAI is checking authorship signals, facts, relevance, and depth…';
-  button.disabled = true;
-  results.style.display = 'none';
-  const isGitHubPages = location.hostname.endsWith('.github.io');
-  if (isGitHubPages){
+  if (location.hostname.endsWith('.github.io')){
     status.className = 'ai-status error';
     status.textContent = 'AI Review is available on the Vercel deployment or in the local Node version, not on GitHub Pages.';
     return;
   }
+  status.className = 'ai-status loading';
+  status.textContent = 'Claude is checking authorship signals, facts, relevance, and depth…';
+  button.disabled = true;
+  results.style.display = 'none';
   const endpoint = location.protocol === 'file:' ? 'http://localhost:8787/api/evaluate' : '/api/evaluate';
   try {
-    const response = await fetch(endpoint, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        topic:document.getElementById('essay-prompt').textContent,
-        unit:document.getElementById('essay-unit').textContent,
-        essay:textValue,
-        integrity:{
-          characters:textValue.length,
-          keystrokes:keystrokes,
-          pasteAttempts:pasteAttempts,
-          tabSwitches:tabSwitches
-        }
-      })
-    });
-    const data = await response.json().catch(function(){ return {}; });
-    if (!response.ok) throw new Error(data.error || 'The AI review service returned an error.');
+    const data = await requestReview(endpoint, JSON.stringify({
+      topic:document.getElementById('essay-prompt').textContent,
+      unit:document.getElementById('essay-unit').textContent,
+      essay:textValue,
+      integrity:{
+        characters:textValue.length,
+        typedCharacters:typedCharacters,
+        keystrokes:keystrokes,
+        bulkInsertions:bulkInsertions,
+        pasteAttempts:pasteAttempts,
+        tabSwitches:tabSwitches
+      }
+    }));
     renderAiReview(data);
     status.className = 'ai-status';
     status.textContent = 'Review complete · scores are advisory, not proof of authorship.';
   } catch (error) {
     status.className = 'ai-status error';
-    status.textContent = location.protocol === 'file:'
+    status.textContent = (error instanceof TypeError && location.protocol === 'file:')
       ? 'AI server is not running. Start the trainer with start-trainer.bat, then open http://localhost:8787.'
       : (error.message || 'Could not complete the AI review.');
   } finally {
@@ -1394,8 +1481,10 @@ function submitEssay(timedOut){
   stageIndex = stages.length - 1;
   renderStages();
   const text = essayText.value.trim();
-  const suspiciousInput = text.length > 50 && keystrokes < text.length * 0.5;
+  // Flag text that arrived in large jumps, or mostly not via small typing steps.
+  const suspiciousInput = bulkInsertions > 0 || (text.length > 50 && typedCharacters < text.length * 0.5);
   const flagged = pasteAttempts > 0 || tabSwitches > 0 || suspiciousInput;
+  clearEssayDraft();
   const badge = document.getElementById('essay-badge');
   badge.style.display = 'inline-flex';
   if (flagged){
